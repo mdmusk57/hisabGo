@@ -2297,21 +2297,6 @@
             function closeModal() { const o = document.getElementById('hkOverlay'); if (o) o.remove();
                 state.editing = null; }
 
-            function openTotalDetailModal() {
-            }
-
-            function openChartModal() {
-            }
-
-            async function exportPDF() {
-            }
-
-            function downloadBackup() {
-            }
-
-            function triggerRestore() {
-            }
-
             function withinRange(d, range) {
                 const now = new Date();
                 if (range === 'today') return dayKey(d) === dayKey(now);
@@ -2325,6 +2310,11 @@
             function sumFor(list, range) {
                 return list.filter(e => withinRange(new Date(e.datetime), range)).reduce((s, e) => s + Number(e.amount ||
                 0), 0);
+            }
+
+            function sumForDay(list, d) {
+                const k = dayKey(d);
+                return list.filter(e => dayKey(new Date(e.datetime)) === k).reduce((s, e) => s + Number(e.amount || 0), 0);
             }
 
             function loadScript(src) {
@@ -2599,15 +2589,191 @@
             }
 
             function openTotalDetailModal() {
-                alert('এই ফিচারটি সংক্ষেপে দেখানো হয়েছে। সম্পূর্ণ কোডে এটি কাজ করবে।');
+                const list = state.expenses;
+                const total = list.reduce((s, e) => s + Number(e.amount || 0), 0);
+                const entries = list.length;
+
+                const byMonth = {};
+                list.forEach(e => {
+                    const d = new Date(e.datetime);
+                    const key = d.getFullYear() + '-' + pad(d.getMonth() + 1);
+                    byMonth[key] = (byMonth[key] || 0) + Number(e.amount || 0);
+                });
+                const monthKeys = Object.keys(byMonth).sort();
+                const avgMonthly = monthKeys.length ? total / monthKeys.length : 0;
+                let highestMonth = null, highestAmt = -1;
+                monthKeys.forEach(k => { if (byMonth[k] > highestAmt) { highestAmt = byMonth[k]; highestMonth = k; } });
+                const highestLabel = highestMonth ?
+                    (BN_MONTHS[parseInt(highestMonth.split('-')[1], 10) - 1] + ' ' + toBn(highestMonth.split('-')[0])) : '-';
+
+                const last6 = monthKeys.slice(-6);
+                const maxLast6 = Math.max(1, ...last6.map(k => byMonth[k]));
+                const trendRows = last6.map(k => {
+                    const [y, m] = k.split('-');
+                    const pct = Math.round((byMonth[k] / maxLast6) * 100);
+                    return `<div class="hk-breakdown-row">
+                        <div class="hk-breakdown-top"><span>${BN_MONTHS_SHORT[parseInt(m, 10) - 1]} ${toBn(y)}</span><span>৳${fmtAmt(byMonth[k])}</span></div>
+                        <div class="hk-breakdown-bar-bg"><div class="hk-breakdown-bar-fg" style="width:${pct}%"></div></div>
+                      </div>`;
+                }).join('');
+
+                const byCat = {};
+                list.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + Number(e.amount || 0); });
+                const maxCat = Math.max(1, ...Object.values(byCat).concat([0]));
+                const catRows = Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([cat, amt]) => {
+                    const info = catInfo(cat);
+                    const pct = Math.round((amt / maxCat) * 100);
+                    return `<div class="hk-breakdown-row">
+                        <div class="hk-breakdown-top"><span>${info.em} ${info.name}</span><span>৳${fmtAmt(amt)}</span></div>
+                        <div class="hk-breakdown-bar-bg"><div class="hk-breakdown-bar-fg" style="width:${pct}%"></div></div>
+                      </div>`;
+                }).join('');
+
+                const overlay = document.createElement('div');
+                overlay.className = 'hk-overlay';
+                overlay.id = 'hkTotalOverlay';
+                overlay.innerHTML = `
+                  <div class="hk-modal">
+                    <div class="hk-modal-head"><div class="hk-modal-title">${t('total_detail')}</div><button class="hk-close" id="hkTotalClose">✕</button></div>
+                    <div class="hk-stats" style="grid-template-columns:repeat(2,1fr); margin-bottom:16px;">
+                      <div class="hk-stat" style="background:var(--paper); border-color:var(--paper-line); cursor:default;">
+                        <div class="hk-stat-label" style="color:var(--ink-soft);">${t('total_all')}</div>
+                        <div class="hk-stat-amt" style="color:var(--ledger-green);">৳${fmtAmt(total)}</div>
+                      </div>
+                      <div class="hk-stat" style="background:var(--paper); border-color:var(--paper-line); cursor:default;">
+                        <div class="hk-stat-label" style="color:var(--ink-soft);">${t('total_entries')}</div>
+                        <div class="hk-stat-amt" style="color:var(--ledger-green);">${toBn(entries)}</div>
+                      </div>
+                      <div class="hk-stat" style="background:var(--paper); border-color:var(--paper-line); cursor:default;">
+                        <div class="hk-stat-label" style="color:var(--ink-soft);">${t('total_avg')}</div>
+                        <div class="hk-stat-amt" style="color:var(--ledger-green);">৳${fmtAmt(avgMonthly)}</div>
+                      </div>
+                      <div class="hk-stat" style="background:var(--paper); border-color:var(--paper-line); cursor:default;">
+                        <div class="hk-stat-label" style="color:var(--ink-soft);">${t('total_highest')}</div>
+                        <div class="hk-stat-amt" style="color:var(--ledger-green); font-size:14px;">${highestLabel}</div>
+                      </div>
+                    </div>
+                    <div class="hk-section-title" style="margin-top:0;">${t('total_trend')}</div>
+                    ${trendRows || `<div style="color:var(--ink-soft); font-size:13px;">${t('chart_no_expenses')}</div>`}
+                    <div class="hk-section-title">${t('total_by_cat')}</div>
+                    ${catRows || `<div style="color:var(--ink-soft); font-size:13px;">${t('chart_no_expenses')}</div>`}
+                  </div>`;
+                document.body.appendChild(overlay);
+                overlay.querySelector('#hkTotalClose').onclick = () => overlay.remove();
+                overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
             }
 
             function openChartModal() {
-                alert('এই ফিচারটি সংক্ষেপে দেখানো হয়েছে। সম্পূর্ণ কোডে এটি কাজ করবে।');
+                const now = new Date();
+                const days = [];
+                for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); days.push(d); }
+                const dayTotals = days.map(d => sumForDay(state.expenses, d));
+                const maxDay = Math.max(1, ...dayTotals);
+                const barsHtml = days.map((d, i) => {
+                    const amt = dayTotals[i];
+                    const pct = Math.max(Math.round((amt / maxDay) * 100), amt > 0 ? 4 : 0);
+                    return `<div style="display:flex; flex-direction:column; align-items:center; flex:1; min-width:0;">
+                        <div style="font-size:10.5px; color:var(--ink-soft); margin-bottom:4px; white-space:nowrap;">৳${fmtAmt(amt)}</div>
+                        <div style="width:70%; height:110px; display:flex; align-items:flex-end; background:var(--paper-line); border-radius:6px; overflow:hidden;">
+                          <div style="width:100%; height:${pct}%; background:var(--ledger-green); border-radius:6px 6px 0 0; transition:height 0.4s ease;"></div>
+                        </div>
+                        <div style="font-size:10.5px; color:var(--ink-soft); margin-top:4px; white-space:nowrap;">${toBn(d.getDate())} ${BN_MONTHS_SHORT[d.getMonth()]}</div>
+                      </div>`;
+                }).join('');
+
+                const monthExpenses = state.expenses.filter(e => withinRange(new Date(e.datetime), 'month'));
+                const byCat = {};
+                monthExpenses.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + Number(e.amount || 0); });
+                const catEntries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+                const totalCat = catEntries.reduce((s, [, v]) => s + v, 0) || 1;
+                const colors = ['#1F4B3F', '#C79A3D', '#A83232', '#4FD1C5', '#8a6a1f', '#2F6A56', '#c95c5c', '#6b6255', '#E2574C', '#93A6B3', '#7a5230'];
+                let acc = 0;
+                const gradientParts = catEntries.map(([cat, amt], i) => {
+                    const start = (acc / totalCat) * 360;
+                    acc += amt;
+                    const end = (acc / totalCat) * 360;
+                    return `${colors[i % colors.length]} ${start}deg ${end}deg`;
+                });
+                const donutStyle = catEntries.length ?
+                    `background: conic-gradient(${gradientParts.join(',')});` : `background: var(--paper-line);`;
+                const legendHtml = catEntries.map(([cat, amt], i) => {
+                    const info = catInfo(cat);
+                    const pct = Math.round((amt / totalCat) * 100);
+                    return `<div class="hk-legend-row">
+                        <div class="hk-legend-dot" style="background:${colors[i % colors.length]}"></div>
+                        <div class="hk-legend-label">${info.em} ${info.name}</div>
+                        <div class="hk-legend-pct">${toBn(pct)}%</div>
+                      </div>`;
+                }).join('');
+
+                const overlay = document.createElement('div');
+                overlay.className = 'hk-overlay';
+                overlay.id = 'hkChartOverlay';
+                overlay.innerHTML = `
+                  <div class="hk-modal">
+                    <div class="hk-modal-head"><div class="hk-modal-title">${t('chart_title')}</div><button class="hk-close" id="hkChartClose">✕</button></div>
+                    <div class="hk-section-title" style="margin-top:0;">${t('chart_last7')}</div>
+                    <div style="display:flex; gap:6px; margin-bottom:14px;">${barsHtml}</div>
+                    <div class="hk-section-title">${t('chart_category_dist')}</div>
+                    ${catEntries.length ? `
+                      <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                        <div style="width:130px; height:130px; border-radius:50%; flex:0 0 auto; ${donutStyle}"></div>
+                        <div style="flex:1; min-width:160px;">${legendHtml}</div>
+                      </div>
+                    ` : `<div style="color:var(--ink-soft); font-size:13px;">${t('chart_no_expenses')}</div>`}
+                  </div>`;
+                document.body.appendChild(overlay);
+                overlay.querySelector('#hkChartClose').onclick = () => overlay.remove();
+                overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
             }
 
-            async function exportPDF() {
-                alert('PDF export feature is available in full version.');
+            function exportPDF() {
+                const now = new Date();
+                const monthExpenses = state.expenses
+                    .filter(e => withinRange(new Date(e.datetime), 'month'))
+                    .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+                const total = monthExpenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+                const rows = monthExpenses.map(e => {
+                    const info = catInfo(e.category);
+                    const d = new Date(e.datetime);
+                    return `<tr>
+                        <td>${toBn(d.getDate())} ${BN_MONTHS_SHORT[d.getMonth()]}</td>
+                        <td>${info.em} ${escapeHtml(info.name)}</td>
+                        <td>${escapeHtml(e.note || '')}</td>
+                        <td>${escapeHtml(e.payment || '')}</td>
+                        <td style="text-align:right;">৳${fmtAmt(e.amount)}</td>
+                      </tr>`;
+                }).join('');
+
+                const win = window.open('', '_blank');
+                if (!win) { alert(t('pdf_error')); return; }
+                win.document.write(`<!DOCTYPE html><html lang="bn"><head><meta charset="UTF-8">
+                  <title>HisabGo Report</title>
+                  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+                  <style>
+                    body { font-family: 'Hind Siliguri', sans-serif; padding: 28px; color: #2B2620; }
+                    h1 { color: #1F4B3F; margin-bottom: 2px; font-size: 22px; }
+                    .sub { color: #6b6255; margin-bottom: 18px; font-size: 13px; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #ccc; padding: 7px 9px; font-size: 13px; text-align: left; }
+                    th { background: #f0ece0; }
+                    .total { margin-top: 16px; font-size: 16px; font-weight: 700; text-align: right; color: #1F4B3F; }
+                    .foot { margin-top: 30px; font-size: 11px; color: #999; text-align: center; }
+                    @media print { body { padding: 10px; } }
+                  </style>
+                  </head><body>
+                    <h1>HisabGo — মাসিক খরচ রিপোর্ট</h1>
+                    <div class="sub">${BN_MONTHS[now.getMonth()]} ${toBn(now.getFullYear())}</div>
+                    <table>
+                      <thead><tr><th>তারিখ</th><th>ক্যাটাগরি</th><th>নোট</th><th>পেমেন্ট</th><th>টাকা</th></tr></thead>
+                      <tbody>${rows || '<tr><td colspan="5" style="text-align:center;">কোনো খরচ নেই</td></tr>'}</tbody>
+                    </table>
+                    <div class="total">সর্বমোট: ৳${fmtAmt(total)}</div>
+                    <div class="foot">HisabGo · Developed by Imrul</div>
+                  </body></html>`);
+                win.document.close();
+                win.focus();
+                setTimeout(() => { win.print(); }, 400);
             }
 
             function downloadBackup() {
