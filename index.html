@@ -4,16 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>HisabGo</title>
-
-    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
-        /* আপনার আগের সব CSS একই থাকবে (শুধু অ্যানিমেশন ও থিম সহ) */
-        /* এখানে CSS পুনরায় লেখার পরিবর্তে আমি শুধু লিংক দিচ্ছি, কিন্তু সম্পূর্ণ ফাইলে সব CSS থাকবে */
+        /* আপনার আগের সব CSS একই থাকবে */
         @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
 
-        /* ---- সমস্ত স্টাইল আগের মতো ---- */
         :root {
             --ledger-green: #1F4B3F;
             --ledger-green-dark: #163a30;
@@ -25,7 +20,6 @@
             --red-soft: #c95c5c;
             --gold: #C79A3D;
             --card: #FFFDF8;
-
             --admin-bg: #101720;
             --admin-panel: #182230;
             --admin-panel2: #1f2c3d;
@@ -66,26 +60,11 @@
         }
 
         /* অ্যানিমেশন */
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-        @keyframes slideInUp {
-            0% { transform: translateY(30px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes slideInLeft {
-            0% { transform: translateX(-30px); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes scaleIn {
-            0% { transform: scale(0.92); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes slideInUp { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInLeft { 0% { transform: translateX(-30px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        @keyframes scaleIn { 0% { transform: scale(0.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .hk-root { animation: fadeIn 0.5s ease forwards; }
         .hk-header { animation: slideInUp 0.5s ease forwards; }
@@ -94,10 +73,7 @@
         .hk-stat:nth-child(2) { animation-delay: 0.10s; }
         .hk-stat:nth-child(3) { animation-delay: 0.15s; }
 
-        .hk-row {
-            animation: slideInLeft 0.35s ease forwards;
-            opacity: 0;
-        }
+        .hk-row { animation: slideInLeft 0.35s ease forwards; opacity: 0; }
         .hk-day-group .hk-row:nth-child(1) { animation-delay: 0.02s; }
         .hk-day-group .hk-row:nth-child(2) { animation-delay: 0.05s; }
         .hk-day-group .hk-row:nth-child(3) { animation-delay: 0.08s; }
@@ -109,30 +85,13 @@
         .hk-day-group .hk-row:nth-child(9) { animation-delay: 0.26s; }
         .hk-day-group .hk-row:nth-child(10) { animation-delay: 0.29s; }
 
-        .hk-add-btn {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .hk-add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(199, 154, 61, 0.4);
-        }
-        .hk-add-btn:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
+        .hk-add-btn { transition: transform 0.2s, box-shadow 0.2s; }
+        .hk-add-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(199, 154, 61, 0.4); }
+        .hk-add-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        .hk-menu-panel {
-            animation: slideInUp 0.25s ease forwards;
-            transform-origin: top right;
-        }
-
-        .hk-modal {
-            animation: slideInUp 0.3s ease forwards;
-        }
-
-        .hk-overlay {
-            animation: fadeIn 0.2s ease forwards;
-        }
+        .hk-menu-panel { animation: slideInUp 0.25s ease forwards; transform-origin: top right; }
+        .hk-modal { animation: slideInUp 0.3s ease forwards; }
+        .hk-overlay { animation: fadeIn 0.2s ease forwards; }
 
         .hk-loading-spinner {
             display: inline-block;
@@ -149,38 +108,18 @@
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
-        .hk-row {
-            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-        }
-        .hk-row:hover {
-            transform: translateX(4px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-left-color: var(--gold);
-        }
+        .hk-row { transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; }
+        .hk-row:hover { transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left-color: var(--gold); }
 
-        .hk-stat {
-            transition: transform 0.2s, background 0.2s;
-        }
-        .hk-stat:hover {
-            transform: scale(1.02);
-        }
+        .hk-stat { transition: transform 0.2s, background 0.2s; }
+        .hk-stat:hover { transform: scale(1.02); }
 
-        .hk-chip {
-            transition: all 0.15s;
-        }
-        .hk-chip:hover {
-            transform: translateY(-1px);
-        }
+        .hk-chip { transition: all 0.15s; }
+        .hk-chip:hover { transform: translateY(-1px); }
 
-        .hk-btn-save {
-            transition: background 0.2s, transform 0.1s;
-        }
-        .hk-btn-save:hover {
-            background: var(--ledger-green-dark);
-        }
-        .hk-btn-save:active {
-            transform: scale(0.97);
-        }
+        .hk-btn-save { transition: background 0.2s, transform 0.1s; }
+        .hk-btn-save:hover { background: var(--ledger-green-dark); }
+        .hk-btn-save:active { transform: scale(0.97); }
 
         .hk-input:focus, .hk-textarea:focus, .hk-select:focus {
             outline: none;
@@ -189,54 +128,20 @@
             transition: box-shadow 0.2s, border-color 0.2s;
         }
 
-        .hk-auth-card {
-            animation: scaleIn 0.5s ease forwards;
-        }
+        .hk-auth-card { animation: scaleIn 0.5s ease forwards; }
+        .hk-search-input { transition: box-shadow 0.2s, border-color 0.2s; }
+        .hk-search-input:focus { border-color: var(--ledger-green); box-shadow: 0 0 0 3px rgba(31, 75, 63, 0.12); }
+        .hk-budget-fg { transition: width 0.6s ease; }
+        .hk-menu-item { transition: background 0.15s; }
 
-        .hk-search-input {
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-        .hk-search-input:focus {
-            border-color: var(--ledger-green);
-            box-shadow: 0 0 0 3px rgba(31, 75, 63, 0.12);
-        }
-
-        .hk-budget-fg {
-            transition: width 0.6s ease;
-        }
-
-        .hk-menu-item {
-            transition: background 0.15s;
-        }
-
-        .ad-user-card {
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .ad-user-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .ad-stat {
-            transition: transform 0.2s, background 0.2s;
-        }
-        .ad-stat:hover {
-            transform: scale(1.02);
-            background: var(--admin-panel2);
-        }
+        .ad-user-card { transition: transform 0.15s, box-shadow 0.15s; }
+        .ad-user-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .ad-stat { transition: transform 0.2s, background 0.2s; }
+        .ad-stat:hover { transform: scale(1.02); background: var(--admin-panel2); }
 
         @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+            * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         }
-
-        /* ---- আগের সব স্টাইল (Auth, App, Admin, Modal) এখানে থাকবে ---- */
-        /* স্থান সীমিত হওয়ায় আমি বাকি CSS সংক্ষেপে দিচ্ছি, কিন্তু সম্পূর্ণ ফাইলে সব থাকবে */
-        /* ... (পুরো CSS আগের মতো) ... */
-        /* নিচে শুধু গুরুত্বপূর্ণ অংশগুলি সংক্ষেপে দেখানো হলো */
 
         /* AUTH */
         .hk-auth-wrap {
@@ -256,24 +161,10 @@
             max-width: 380px;
             box-shadow: 0 10px 30px rgba(31, 75, 63, 0.08);
         }
-        .hk-auth-logo {
-            text-align: center;
-            margin-bottom: 4px;
-        }
-        .hk-auth-logo .hk-brand {
-            font-size: 26px;
-            color: var(--ledger-green);
-        }
-        .hk-auth-logo .em {
-            font-size: 26px;
-            margin-right: 4px;
-        }
-        .hk-auth-sub {
-            text-align: center;
-            color: var(--ink-soft);
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
+        .hk-auth-logo { text-align: center; margin-bottom: 4px; }
+        .hk-auth-logo .hk-brand { font-size: 26px; color: var(--ledger-green); }
+        .hk-auth-logo .em { font-size: 26px; margin-right: 4px; }
+        .hk-auth-sub { text-align: center; color: var(--ink-soft); font-size: 13px; margin-bottom: 20px; }
         .hk-tabs {
             display: flex;
             background: var(--paper);
@@ -292,20 +183,9 @@
             color: var(--ink-soft);
             transition: background 0.2s, color 0.2s;
         }
-        .hk-tab.active {
-            background: var(--ledger-green);
-            color: #fff;
-        }
-        .hk-field {
-            margin-bottom: 14px;
-        }
-        .hk-label {
-            display: block;
-            font-size: 12.5px;
-            color: var(--ink-soft);
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
+        .hk-tab.active { background: var(--ledger-green); color: #fff; }
+        .hk-field { margin-bottom: 14px; }
+        .hk-label { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 5px; font-weight: 600; }
         .hk-input, .hk-select, .hk-textarea {
             width: 100%;
             border: 1px solid var(--paper-line);
@@ -317,10 +197,7 @@
             color: var(--ink);
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .hk-textarea {
-            resize: vertical;
-            min-height: 44px;
-        }
+        .hk-textarea { resize: vertical; min-height: 44px; }
         .hk-btn-save {
             width: 100%;
             background: var(--ledger-green);
@@ -334,24 +211,11 @@
             font-family: 'Hind Siliguri', sans-serif;
             transition: background 0.2s, transform 0.1s;
         }
-        .hk-btn-save:hover {
-            background: var(--ledger-green-dark);
-        }
-        .hk-btn-save:active {
-            transform: scale(0.97);
-        }
-        .hk-error {
-            color: var(--red);
-            font-size: 12.5px;
-            margin-top: -6px;
-            margin-bottom: 10px;
-        }
-        .hk-pw-wrap {
-            position: relative;
-        }
-        .hk-pw-wrap .hk-input {
-            padding-right: 40px;
-        }
+        .hk-btn-save:hover { background: var(--ledger-green-dark); }
+        .hk-btn-save:active { transform: scale(0.97); }
+        .hk-error { color: var(--red); font-size: 12.5px; margin-top: -6px; margin-bottom: 10px; }
+        .hk-pw-wrap { position: relative; }
+        .hk-pw-wrap .hk-input { padding-right: 40px; }
         .hk-eye {
             position: absolute;
             right: 6px;
@@ -364,24 +228,9 @@
             padding: 6px;
             line-height: 1;
         }
-        .hk-auth-foot {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 12px;
-        }
-        .hk-link {
-            color: var(--ledger-green);
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        .hk-admin-link {
-            text-align: center;
-            margin-top: 14px;
-            font-size: 11.5px;
-            color: var(--ink-soft);
-            cursor: pointer;
-        }
+        .hk-auth-foot { text-align: center; margin-top: 16px; font-size: 12px; }
+        .hk-link { color: var(--ledger-green); font-weight: 700; cursor: pointer; text-decoration: underline; }
+        .hk-admin-link { text-align: center; margin-top: 14px; font-size: 11.5px; color: var(--ink-soft); cursor: pointer; }
 
         /* APP HEADER */
         .hk-spine { display: none; }
@@ -398,29 +247,11 @@
             align-items: flex-start;
             margin-bottom: 14px;
         }
-        .hk-title {
-            font-size: 24px;
-            margin: 0 0 2px 0;
-            letter-spacing: 0.3px;
-        }
-        .hk-subtitle {
-            font-size: 12.5px;
-            color: #cfe0d8;
-            margin: 0;
-        }
-        .hk-user-chip {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .hk-user-name {
-            font-size: 12.5px;
-            color: #e7f0eb;
-            font-weight: 600;
-        }
-        .hk-menu-wrap {
-            position: relative;
-        }
+        .hk-title { font-size: 24px; margin: 0 0 2px 0; letter-spacing: 0.3px; }
+        .hk-subtitle { font-size: 12.5px; color: #cfe0d8; margin: 0; }
+        .hk-user-chip { display: flex; align-items: center; gap: 8px; }
+        .hk-user-name { font-size: 12.5px; color: #e7f0eb; font-weight: 600; }
+        .hk-menu-wrap { position: relative; }
         .hk-menu-btn {
             width: 30px;
             height: 30px;
@@ -433,10 +264,7 @@
             line-height: 1;
             transition: background 0.2s, transform 0.2s;
         }
-        .hk-menu-btn:hover {
-            background: rgba(255,255,255,0.22);
-            transform: rotate(90deg);
-        }
+        .hk-menu-btn:hover { background: rgba(255,255,255,0.22); transform: rotate(90deg); }
         .hk-menu-panel {
             position: absolute;
             top: calc(100% + 8px);
@@ -463,21 +291,10 @@
             cursor: pointer;
             transition: background 0.15s;
         }
-        .hk-menu-item:hover {
-            background: var(--paper);
-        }
-        .hk-menu-right {
-            font-size: 11px;
-            color: var(--ink-soft);
-        }
-        .hk-menu-divider {
-            height: 1px;
-            background: var(--paper-line);
-            margin: 5px 4px;
-        }
-        .hk-menu-danger {
-            color: var(--red);
-        }
+        .hk-menu-item:hover { background: var(--paper); }
+        .hk-menu-right { font-size: 11px; color: var(--ink-soft); }
+        .hk-menu-divider { height: 1px; background: var(--paper-line); margin: 5px 4px; }
+        .hk-menu-danger { color: var(--red); }
         .hk-stats {
             display: grid;
             grid-template-columns: repeat(3,1fr);
@@ -492,57 +309,18 @@
             cursor: pointer;
             transition: transform 0.2s, background 0.2s;
         }
-        .hk-stat:hover {
-            background: rgba(255,255,255,0.16);
-            transform: scale(1.02);
-        }
-        .hk-stat.active {
-            background: var(--gold);
-            border-color: var(--gold);
-        }
-        .hk-stat.active .hk-stat-label,
-        .hk-stat.active .hk-stat-amt {
-            color: var(--ledger-green-dark);
-        }
-        .hk-stat-label {
-            font-size: 11.5px;
-            color: #d8e6df;
-            margin-bottom: 4px;
-        }
-        .hk-stat-amt {
-            font-size: 17px;
-            font-weight: 700;
-            color: #fff;
-        }
-        .hk-budget-bar-wrap {
-            margin-top: 14px;
-        }
-        .hk-budget-top {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11.5px;
-            color: #d8e6df;
-            margin-bottom: 5px;
-        }
-        .hk-budget-bg {
-            height: 8px;
-            background: rgba(255,255,255,0.18);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .hk-budget-fg {
-            height: 100%;
-            background: var(--gold);
-            border-radius: 5px;
-            transition: width 0.6s ease;
-        }
+        .hk-stat:hover { background: rgba(255,255,255,0.16); transform: scale(1.02); }
+        .hk-stat.active { background: var(--gold); border-color: var(--gold); }
+        .hk-stat.active .hk-stat-label, .hk-stat.active .hk-stat-amt { color: var(--ledger-green-dark); }
+        .hk-stat-label { font-size: 11.5px; color: #d8e6df; margin-bottom: 4px; }
+        .hk-stat-amt { font-size: 17px; font-weight: 700; color: #fff; }
+        .hk-budget-bar-wrap { margin-top: 14px; }
+        .hk-budget-top { display: flex; justify-content: space-between; font-size: 11.5px; color: #d8e6df; margin-bottom: 5px; }
+        .hk-budget-bg { height: 8px; background: rgba(255,255,255,0.18); border-radius: 5px; overflow: hidden; }
+        .hk-budget-fg { height: 100%; background: var(--gold); border-radius: 5px; transition: width 0.6s ease; }
         .hk-budget-fg.warn { background: #e2a33d; }
         .hk-budget-fg.over { background: var(--red-soft); }
-        .hk-budget-warn {
-            font-size: 11px;
-            color: #ffe1b3;
-            margin-top: 5px;
-        }
+        .hk-budget-warn { font-size: 11px; color: #ffe1b3; margin-top: 5px; }
         .hk-search-input {
             width: 100%;
             border: 1px solid var(--paper-line);
@@ -555,15 +333,9 @@
             font-family: 'Hind Siliguri', sans-serif;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .hk-search-input:focus {
-            border-color: var(--ledger-green);
-            box-shadow: 0 0 0 3px rgba(31,75,63,0.12);
-            outline: none;
-        }
+        .hk-search-input:focus { border-color: var(--ledger-green); box-shadow: 0 0 0 3px rgba(31,75,63,0.12); outline: none; }
 
-        .hk-body {
-            padding: 18px 20px 90px 20px;
-        }
+        .hk-body { padding: 18px 20px 90px 20px; }
         .hk-add-btn {
             width: 100%;
             background: var(--gold);
@@ -578,14 +350,8 @@
             box-shadow: 0 2px 0 #a97f2a;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .hk-add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(199,154,61,0.4);
-        }
-        .hk-add-btn:active {
-            transform: translateY(2px);
-            box-shadow: none;
-        }
+        .hk-add-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(199,154,61,0.4); }
+        .hk-add-btn:active { transform: translateY(2px); box-shadow: none; }
         .hk-filters {
             display: flex;
             gap: 8px;
@@ -605,14 +371,8 @@
             color: var(--ink-soft);
             transition: all 0.15s;
         }
-        .hk-chip:hover {
-            transform: translateY(-1px);
-        }
-        .hk-chip.active {
-            background: var(--ledger-green);
-            border-color: var(--ledger-green);
-            color: #fff;
-        }
+        .hk-chip:hover { transform: translateY(-1px); }
+        .hk-chip.active { background: var(--ledger-green); border-color: var(--ledger-green); color: #fff; }
         .hk-section-title {
             font-family: 'Tiro Bangla', serif;
             font-size: 16px;
@@ -621,12 +381,7 @@
             padding-bottom: 6px;
             border-bottom: 1px dashed var(--paper-line);
         }
-        .hk-day-label {
-            font-size: 12.5px;
-            color: var(--ink-soft);
-            margin: 14px 0 6px 2px;
-            font-weight: 600;
-        }
+        .hk-day-label { font-size: 12.5px; color: var(--ink-soft); margin: 14px 0 6px 2px; font-weight: 600; }
         .hk-row {
             background: var(--card);
             border: 1px solid var(--paper-line);
@@ -640,43 +395,14 @@
             cursor: pointer;
             transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
         }
-        .hk-row:hover {
-            transform: translateX(4px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            border-left-color: var(--gold);
-        }
-        .hk-row-icon {
-            font-size: 20px;
-            flex: 0 0 auto;
-        }
-        .hk-row-main {
-            flex: 1;
-            min-width: 0;
-        }
-        .hk-row-cat {
-            font-size: 14.5px;
-            font-weight: 600;
-        }
-        .hk-row-note {
-            font-size: 12.5px;
-            color: var(--ink-soft);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .hk-row-right {
-            text-align: right;
-            flex: 0 0 auto;
-        }
-        .hk-row-amt {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--red);
-        }
-        .hk-row-pay {
-            font-size: 11px;
-            color: var(--ink-soft);
-        }
+        .hk-row:hover { transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left-color: var(--gold); }
+        .hk-row-icon { font-size: 20px; flex: 0 0 auto; }
+        .hk-row-main { flex: 1; min-width: 0; }
+        .hk-row-cat { font-size: 14.5px; font-weight: 600; }
+        .hk-row-note { font-size: 12.5px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .hk-row-right { text-align: right; flex: 0 0 auto; }
+        .hk-row-amt { font-size: 15px; font-weight: 700; color: var(--red); }
+        .hk-row-pay { font-size: 11px; color: var(--ink-soft); }
         .hk-row-thumb {
             width: 34px;
             height: 34px;
@@ -694,33 +420,11 @@
             border-radius: 12px;
             background: var(--card);
         }
-        .hk-breakdown-row {
-            margin-bottom: 10px;
-        }
-        .hk-breakdown-top {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        .hk-breakdown-bar-bg {
-            height: 8px;
-            background: var(--paper-line);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .hk-breakdown-bar-fg {
-            height: 100%;
-            background: var(--ledger-green);
-            border-radius: 5px;
-            transition: width 0.6s ease;
-        }
-        .hk-footer {
-            text-align: center;
-            font-size: 11.5px;
-            color: var(--ink-soft);
-            padding: 18px 0 26px 0;
-        }
+        .hk-breakdown-row { margin-bottom: 10px; }
+        .hk-breakdown-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+        .hk-breakdown-bar-bg { height: 8px; background: var(--paper-line); border-radius: 5px; overflow: hidden; }
+        .hk-breakdown-bar-fg { height: 100%; background: var(--ledger-green); border-radius: 5px; transition: width 0.6s ease; }
+        .hk-footer { text-align: center; font-size: 11.5px; color: var(--ink-soft); padding: 18px 0 26px 0; }
 
         /* Modal */
         .hk-overlay {
@@ -743,17 +447,8 @@
             overflow-y: auto;
             animation: slideInUp 0.3s ease forwards;
         }
-        .hk-modal-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .hk-modal-title {
-            font-family: 'Tiro Bangla', serif;
-            font-size: 19px;
-            color: var(--ledger-green);
-        }
+        .hk-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .hk-modal-title { font-family: 'Tiro Bangla', serif; font-size: 19px; color: var(--ledger-green); }
         .hk-close {
             background: none;
             border: none;
@@ -763,14 +458,8 @@
             padding: 4px 8px;
             transition: transform 0.2s;
         }
-        .hk-close:hover {
-            transform: rotate(90deg);
-        }
-        .hk-cat-grid {
-            display: grid;
-            grid-template-columns: repeat(4,1fr);
-            gap: 8px;
-        }
+        .hk-close:hover { transform: rotate(90deg); }
+        .hk-cat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
         .hk-cat-opt {
             border: 1.5px solid var(--paper-line);
             border-radius: 11px;
@@ -782,25 +471,10 @@
             color: var(--ink-soft);
             transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.1s;
         }
-        .hk-cat-opt:hover {
-            transform: scale(1.02);
-        }
-        .hk-cat-opt .em {
-            font-size: 19px;
-            display: block;
-            margin-bottom: 3px;
-        }
-        .hk-cat-opt.active {
-            border-color: var(--ledger-green);
-            background: #eaf2ee;
-            color: var(--ledger-green);
-            font-weight: 700;
-        }
-        .hk-pay-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+        .hk-cat-opt:hover { transform: scale(1.02); }
+        .hk-cat-opt .em { font-size: 19px; display: block; margin-bottom: 3px; }
+        .hk-cat-opt.active { border-color: var(--ledger-green); background: #eaf2ee; color: var(--ledger-green); font-weight: 700; }
+        .hk-pay-row { display: flex; gap: 8px; flex-wrap: wrap; }
         .hk-pay-opt {
             border: 1.5px solid var(--paper-line);
             border-radius: 20px;
@@ -811,15 +485,8 @@
             color: var(--ink-soft);
             transition: border-color 0.2s, background 0.2s, color 0.2s;
         }
-        .hk-pay-opt:hover {
-            transform: scale(1.02);
-        }
-        .hk-pay-opt.active {
-            border-color: var(--gold);
-            background: #fbf1dc;
-            color: #8a6a1f;
-            font-weight: 700;
-        }
+        .hk-pay-opt:hover { transform: scale(1.02); }
+        .hk-pay-opt.active { border-color: var(--gold); background: #fbf1dc; color: #8a6a1f; font-weight: 700; }
         .hk-upload-box {
             border: 1.5px dashed var(--paper-line);
             border-radius: 11px;
@@ -831,27 +498,10 @@
             position: relative;
             transition: border-color 0.2s, background 0.2s;
         }
-        .hk-upload-box:hover {
-            border-color: var(--ledger-green);
-            background: rgba(31,75,63,0.04);
-        }
-        .hk-upload-preview {
-            max-width: 100%;
-            max-height: 130px;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-        .hk-upload-box input {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-        .hk-modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 6px;
-        }
+        .hk-upload-box:hover { border-color: var(--ledger-green); background: rgba(31,75,63,0.04); }
+        .hk-upload-preview { max-width: 100%; max-height: 130px; border-radius: 8px; margin-top: 8px; }
+        .hk-upload-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .hk-modal-actions { display: flex; gap: 10px; margin-top: 6px; }
         .hk-btn-delete {
             background: #fff;
             color: var(--red);
@@ -864,17 +514,8 @@
             font-family: 'Hind Siliguri', sans-serif;
             transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
-        .hk-btn-delete:hover {
-            background: var(--red);
-            color: #fff;
-            border-color: var(--red);
-        }
-        .hk-loading {
-            text-align: center;
-            padding: 60px 10px;
-            color: var(--ink-soft);
-            font-size: 14px;
-        }
+        .hk-btn-delete:hover { background: var(--red); color: #fff; border-color: var(--red); }
+        .hk-loading { text-align: center; padding: 60px 10px; color: var(--ink-soft); font-size: 14px; }
         .hk-pdf-loading {
             position: fixed;
             inset: 0;
@@ -889,19 +530,8 @@
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
-        .hk-legend-row {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 12.5px;
-            margin-bottom: 7px;
-        }
-        .hk-legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 3px;
-            flex: 0 0 auto;
-        }
+        .hk-legend-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; margin-bottom: 7px; }
+        .hk-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex: 0 0 auto; }
         .hk-legend-label { flex: 1; }
         .hk-legend-pct { font-weight: 700; }
 
@@ -912,11 +542,7 @@
             color: var(--admin-text);
             font-family: 'Hind Siliguri', sans-serif;
         }
-        .ad-wrap {
-            max-width: 920px;
-            margin: 0 auto;
-            padding: 0 0 60px 0;
-        }
+        .ad-wrap { max-width: 920px; margin: 0 auto; padding: 0 0 60px 0; }
         .ad-header {
             display: flex;
             justify-content: space-between;
@@ -924,17 +550,8 @@
             padding: 20px 22px;
             border-bottom: 1px solid var(--admin-line);
         }
-        .ad-brand {
-            font-size: 19px;
-            color: var(--admin-accent);
-        }
-        .ad-brand .tag {
-            font-size: 11px;
-            color: var(--admin-muted);
-            display: block;
-            margin-top: 2px;
-            font-weight: 400;
-        }
+        .ad-brand { font-size: 19px; color: var(--admin-accent); }
+        .ad-brand .tag { font-size: 11px; color: var(--admin-muted); display: block; margin-top: 2px; font-weight: 400; }
         .ad-logout {
             font-size: 12.5px;
             color: var(--admin-muted);
@@ -944,13 +561,8 @@
             cursor: pointer;
             transition: color 0.2s, border-color 0.2s;
         }
-        .ad-logout:hover {
-            color: var(--admin-text);
-            border-color: var(--admin-accent);
-        }
-        .ad-body {
-            padding: 20px 22px;
-        }
+        .ad-logout:hover { color: var(--admin-text); border-color: var(--admin-accent); }
+        .ad-body { padding: 20px 22px; }
         .ad-stats {
             display: grid;
             grid-template-columns: repeat(4,1fr);
@@ -964,20 +576,9 @@
             padding: 14px;
             transition: transform 0.2s, background 0.2s;
         }
-        .ad-stat:hover {
-            transform: scale(1.02);
-            background: var(--admin-panel2);
-        }
-        .ad-stat-label {
-            font-size: 11.5px;
-            color: var(--admin-muted);
-            margin-bottom: 6px;
-        }
-        .ad-stat-val {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--admin-text);
-        }
+        .ad-stat:hover { transform: scale(1.02); background: var(--admin-panel2); }
+        .ad-stat-label { font-size: 11.5px; color: var(--admin-muted); margin-bottom: 6px; }
+        .ad-stat-val { font-size: 20px; font-weight: 700; color: var(--admin-text); }
         .ad-search {
             width: 100%;
             background: var(--admin-panel);
@@ -990,20 +591,9 @@
             font-family: 'Hind Siliguri', sans-serif;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .ad-search:focus {
-            outline: none;
-            border-color: var(--admin-accent);
-            box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
-        }
-        .ad-search::placeholder {
-            color: var(--admin-muted);
-        }
-        .ad-section-title {
-            font-size: 14px;
-            color: var(--admin-muted);
-            margin: 0 0 12px 0;
-            text-transform: none;
-        }
+        .ad-search:focus { outline: none; border-color: var(--admin-accent); box-shadow: 0 0 0 3px rgba(79,209,197,0.15); }
+        .ad-search::placeholder { color: var(--admin-muted); }
+        .ad-section-title { font-size: 14px; color: var(--admin-muted); margin: 0 0 12px 0; text-transform: none; }
         .ad-user-card {
             background: var(--admin-panel);
             border: 1px solid var(--admin-line);
@@ -1012,10 +602,7 @@
             overflow: hidden;
             transition: transform 0.15s, box-shadow 0.15s;
         }
-        .ad-user-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+        .ad-user-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .ad-user-top {
             display: flex;
             align-items: center;
@@ -1035,35 +622,12 @@
             font-weight: 700;
             flex: 0 0 auto;
         }
-        .ad-user-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .ad-user-name {
-            font-size: 14.5px;
-            font-weight: 600;
-        }
-        .ad-user-email {
-            font-size: 12px;
-            color: var(--admin-muted);
-        }
-        .ad-user-meta {
-            text-align: right;
-            font-size: 12px;
-            color: var(--admin-muted);
-            flex: 0 0 auto;
-        }
-        .ad-user-meta .amt {
-            color: var(--admin-accent);
-            font-weight: 700;
-            font-size: 14px;
-            display: block;
-        }
-        .ad-user-actions {
-            display: flex;
-            gap: 8px;
-            padding: 0 14px 14px 14px;
-        }
+        .ad-user-info { flex: 1; min-width: 0; }
+        .ad-user-name { font-size: 14.5px; font-weight: 600; }
+        .ad-user-email { font-size: 12px; color: var(--admin-muted); }
+        .ad-user-meta { text-align: right; font-size: 12px; color: var(--admin-muted); flex: 0 0 auto; }
+        .ad-user-meta .amt { color: var(--admin-accent); font-weight: 700; font-size: 14px; display: block; }
+        .ad-user-actions { display: flex; gap: 8px; padding: 0 14px 14px 14px; }
         .ad-btn {
             font-size: 12px;
             border-radius: 8px;
@@ -1075,45 +639,16 @@
             font-family: 'Hind Siliguri', sans-serif;
             transition: color 0.2s, background 0.2s, border-color 0.2s;
         }
-        .ad-btn:hover {
-            color: var(--admin-text);
-            background: rgba(255,255,255,0.05);
-        }
-        .ad-btn-danger {
-            color: var(--admin-danger);
-            border-color: rgba(226,87,76,0.4);
-        }
-        .ad-btn-danger:hover {
-            background: rgba(226,87,76,0.1);
-        }
-        .ad-detail {
-            border-top: 1px solid var(--admin-line);
-            padding: 14px;
-            background: var(--admin-panel2);
-        }
-        .ad-empty {
-            text-align: center;
-            color: var(--admin-muted);
-            padding: 40px;
-            border: 1px dashed var(--admin-line);
-            border-radius: 12px;
-        }
-        .ad-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--admin-line);
-            font-size: 13px;
-        }
+        .ad-btn:hover { color: var(--admin-text); background: rgba(255,255,255,0.05); }
+        .ad-btn-danger { color: var(--admin-danger); border-color: rgba(226,87,76,0.4); }
+        .ad-btn-danger:hover { background: rgba(226,87,76,0.1); }
+        .ad-detail { border-top: 1px solid var(--admin-line); padding: 14px; background: var(--admin-panel2); }
+        .ad-empty { text-align: center; color: var(--admin-muted); padding: 40px; border: 1px dashed var(--admin-line); border-radius: 12px; }
+        .ad-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--admin-line); font-size: 13px; }
         .ad-row:last-child { border-bottom: none; }
         .ad-row .cat { color: var(--admin-text); }
         .ad-row .amt { color: var(--admin-accent); font-weight: 600; }
-        .ad-foot {
-            text-align: center;
-            font-size: 11px;
-            color: var(--admin-muted);
-            padding: 20px 0;
-        }
+        .ad-foot { text-align: center; font-size: 11px; color: var(--admin-muted); padding: 20px 0; }
 
         .hk-menu-item .lang-badge {
             font-size: 11px;
@@ -1134,7 +669,7 @@
             const SUPABASE_URL = 'https://hwtatkiexydjzgaxltpi.supabase.co';
             const SUPABASE_ANON_KEY = 'sb_publishable_zxoMyVHYFzhfbA5FYbdjrA_2dDnnr0H';
 
-            // ---------- TRANSLATIONS (সংক্ষেপে) ----------
+            // ---------- TRANSLATIONS ----------
             const L = {
                 bn: {
                     auth_sub: 'প্রতিদিনের খরচের সহজ হিসাব',
@@ -1264,7 +799,6 @@
                     backup_invalid: 'ফাইলটি সঠিক HisabGo ব্যাকআপ ফাইল নয় বা পড়া যায়নি।',
                     lang_bn: 'বাংলা',
                     lang_en: 'English',
-                    // error messages
                     err_network: 'নেটওয়ার্ক সমস্যা, আবার চেষ্টা করুন।',
                 },
                 en: {
@@ -1461,7 +995,7 @@
             let state = {
                 screen: 'loading',
                 authError: '',
-                user: null, // Supabase user object
+                user: null,
                 session: null,
                 expenses: [],
                 filterCat: 'all',
@@ -1469,17 +1003,23 @@
                 editing: null,
                 adminSearch: '',
                 adminExpanded: null,
-                adminCache: {}, // userId -> {count, total, list}
+                adminCache: {},
                 theme: 'paper',
                 budget: 0,
                 searchQuery: '',
                 lang: 'bn',
                 isAdmin: false,
-                allUsers: [], // for admin
+                allUsers: [],
             };
 
-            // ---------- SUPABASE CLIENT ----------
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            // ---------- SUPABASE CLIENT (স্থিতিশীল) ----------
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    storage: window.localStorage,
+                }
+            });
 
             // ---------- FUNCTIONS ----------
             async function loadExpenses() {
@@ -1491,10 +1031,6 @@
                     .order('datetime', { ascending: false });
                 if (error) { console.error('loadExpenses error', error); return []; }
                 return data || [];
-            }
-
-            async function saveExpenses(expenses) {
-                // Not used directly; we use upsert for each change
             }
 
             async function loadPrefs() {
@@ -1510,7 +1046,6 @@
                     state.budget = data.budget || 0;
                     state.lang = data.lang || 'bn';
                 } else {
-                    // insert default prefs
                     const { error: insErr } = await supabase
                         .from('prefs')
                         .insert({ user_id: state.user.id, theme: 'paper', budget: 0, lang: 'bn' });
@@ -1562,35 +1097,39 @@
                 return !!data;
             }
 
-            // ---------- LOAD ALL USERS (admin) ----------
-            async function loadAllUsers() {
+            // ---------- EXPENSE CRUD ----------
+            async function addExpense(expense) {
+                if (!state.user) return;
                 const { data, error } = await supabase
-                    .from('users_view') // or auth.users not accessible; we'll use a custom view or function
-                    .select('*');
-                // Actually, we need to create a view in Supabase: 
-                // CREATE VIEW users_view AS SELECT id, email, raw_user_meta_data->>'name' as name, created_at FROM auth.users;
-                // But to keep it simple, we can use a function or just fetch from expenses grouped.
-                // For now, we'll use a RPC function or fallback.
-                // Let's use a simpler approach: fetch distinct users from expenses table + admins.
-                // But we need all users. I'll create a function in SQL to get users.
-                // For demo, I'll just fetch from admins and expenses.
-                // Better: use supabase admin API (requires service role key), but we have anon key.
-                // So I'll implement a workaround: when admin views, we fetch all expenses grouped by user_id.
-                // Or we can use a PostgreSQL function.
-                // Since it's complex, I'll add a button to sync users from auth via a secure function.
-                // For now, we'll just show users that have expenses.
-                const { data: expData, error: expErr } = await supabase
                     .from('expenses')
-                    .select('user_id')
-                    .order('user_id');
-                if (expErr) { console.error('loadAllUsers error', expErr); return []; }
-                const userIds = [...new Set(expData.map(e => e.user_id))];
-                // Now fetch each user's info from auth.users - we can't directly, but we can store in a users table.
-                // I'll assume we have a 'profiles' table that stores user name and email.
-                // Since we don't have that, we'll just use the user_id and fetch from expenses.
-                // For admin, we'll display user_id and count.
-                const users = userIds.map(id => ({ id, name: id.slice(0, 8), email: id }));
-                return users;
+                    .insert({ ...expense, user_id: state.user.id })
+                    .select()
+                    .single();
+                if (error) { console.error('addExpense error', error); throw error; }
+                return data;
+            }
+
+            async function updateExpense(id, updates) {
+                if (!state.user) return;
+                const { data, error } = await supabase
+                    .from('expenses')
+                    .update(updates)
+                    .eq('id', id)
+                    .eq('user_id', state.user.id)
+                    .select()
+                    .single();
+                if (error) { console.error('updateExpense error', error); throw error; }
+                return data;
+            }
+
+            async function deleteExpense(id) {
+                if (!state.user) return;
+                const { error } = await supabase
+                    .from('expenses')
+                    .delete()
+                    .eq('id', id)
+                    .eq('user_id', state.user.id);
+                if (error) { console.error('deleteExpense error', error); throw error; }
             }
 
             // ---------- RENDER ----------
@@ -1789,37 +1328,24 @@
                 const body = document.getElementById('adminBody');
                 if (!body) return;
 
-                // Fetch all users from auth (via a custom function or view)
-                // For simplicity, we'll fetch from expenses and prefs.
-                // Let's create a function in Supabase to get all users.
-                // Since we can't, we'll use a workaround: we'll fetch all expenses and group by user_id.
-                // But we also need user names and emails.
-                // I'll assume we have a 'profiles' table with user data.
-                // For demo, I'll just show user_id and count.
                 const { data: expensesAll, error: expErr } = await supabase
                     .from('expenses')
-                    .select('user_id, amount');
+                    .select('user_id, amount, datetime, category');
                 if (expErr) { console.error('admin load error', expErr);
                     body.innerHTML = `<div class="ad-empty">${t('err_network')}</div>`; return; }
 
                 const userMap = {};
                 expensesAll.forEach(e => {
-                    if (!userMap[e.user_id]) userMap[e.user_id] = { count: 0, total: 0 };
+                    if (!userMap[e.user_id]) userMap[e.user_id] = { count: 0, total: 0, expenses: [] };
                     userMap[e.user_id].count++;
                     userMap[e.user_id].total += Number(e.amount || 0);
+                    userMap[e.user_id].expenses.push(e);
                 });
 
-                // Also fetch prefs for each user to get name? We don't have.
-                // We'll just show user_id.
                 const userIds = Object.keys(userMap);
                 const totalUsers = userIds.length;
                 const totalTx = expensesAll.length;
                 const totalAmt = Object.values(userMap).reduce((s, c) => s + c.total, 0);
-                const now = new Date();
-                const weekAgo = new Date(now);
-                weekAgo.setDate(now.getDate() - 7);
-
-                // For new this week, we need joined_at; we don't have. Skip.
 
                 const q = state.adminSearch.trim().toLowerCase();
                 const filteredUsers = userIds.filter(id => id.toLowerCase().includes(q));
@@ -1835,10 +1361,8 @@
               <div class="ad-section-title">${t('admin_user_list')} (${filteredUsers.length})</div>
               ${filteredUsers.length===0 ? `<div class="ad-empty">${t('admin_no_users')}</div>` :
                 filteredUsers.map(id=>{
-                  const agg = userMap[id] || {count:0,total:0};
+                  const agg = userMap[id] || {count:0,total:0,expenses:[]};
                   const expanded = state.adminExpanded === id;
-                  // Fetch expenses for this user
-                  const userExpenses = expensesAll.filter(e=>e.user_id===id);
                   return `
                   <div class="ad-user-card">
                     <div class="ad-user-top" data-uid="${id}">
@@ -1855,13 +1379,13 @@
                     </div>
                     ${expanded ? `
                       <div class="ad-detail">
-                        ${userExpenses.length===0 ? `<div style="color:var(--admin-muted); font-size:13px;">${t('admin_no_entries')}</div>` :
-                          userExpenses.slice(0,25).map(e=>{
+                        ${agg.expenses.length===0 ? `<div style="color:var(--admin-muted); font-size:13px;">${t('admin_no_entries')}</div>` :
+                          agg.expenses.slice(0,25).map(e=>{
                             const info = catInfo(e.category);
                             const d = new Date(e.datetime);
                             return `<div class="ad-row"><span class="cat">${info.em} ${info.name} · ${toBn(d.getDate())} ${BN_MONTHS[d.getMonth()]}</span><span class="amt">৳${fmtAmt(e.amount)}</span></div>`;
                           }).join('')}
-                        ${userExpenses.length>25 ? `<div style="color:var(--admin-muted); font-size:12px; margin-top:8px;">আরও ${toBn(userExpenses.length-25)}${t('admin_entries')}</div>` : ''}
+                        ${agg.expenses.length>25 ? `<div style="color:var(--admin-muted); font-size:12px; margin-top:8px;">আরও ${toBn(agg.expenses.length-25)}${t('admin_entries')}</div>` : ''}
                       </div>
                     ` : ''}
                   </div>`;
@@ -1888,11 +1412,9 @@
                         ev.stopPropagation();
                         const uidv = el.getAttribute('data-deluser');
                         if (!confirm(t('admin_confirm_delete', { name: uidv }))) return;
-                        // Delete user's data
                         await supabase.from('expenses').delete().eq('user_id', uidv);
                         await supabase.from('prefs').delete().eq('user_id', uidv);
-                        // Delete user from auth (requires admin access, we'll skip)
-                        alert('ব্যবহারকারীর ডেটা মুছে ফেলা হয়েছে (অথেনটিকেশন থেকে মুছতে সুপাবেস ড্যাশবোর্ড ব্যবহার করুন)');
+                        alert('ব্যবহারকারীর ডেটা মুছে ফেলা হয়েছে');
                         renderAdminBody();
                     };
                 });
@@ -1904,7 +1426,7 @@
                 }
             }
 
-            // ---------- MODALS ----------
+            // ---------- MODALS (প্রোফাইল, পাসওয়ার্ড, বাজেট) ----------
             function openChangePasswordModal() {
                 const overlay = document.createElement('div');
                 overlay.className = 'hk-overlay';
@@ -1929,14 +1451,10 @@
                 overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
                 wireEyeToggles(overlay);
                 overlay.querySelector('#pwSaveBtn').onclick = async () => {
-                    const cur = overlay.querySelector('#curPass').value;
                     const n1 = overlay.querySelector('#newPass').value;
                     const n2 = overlay.querySelector('#newPass2').value;
                     const errEl = overlay.querySelector('#pwErr');
                     errEl.style.display = 'none';
-                    if (!state.user) { errEl.textContent = 'User not logged in';
-                        errEl.style.display = 'block'; return; }
-                    // Supabase updates password
                     if (n1.length < 4) { errEl.textContent = t('pw_err_len');
                         errEl.style.display = 'block'; return; }
                     if (n1 !== n2) { errEl.textContent = t('pw_err_match');
@@ -2002,42 +1520,7 @@
                 };
             }
 
-            // ---------- EXPENSE CRUD (Supabase) ----------
-            async function addExpense(expense) {
-                if (!state.user) return;
-                const { data, error } = await supabase
-                    .from('expenses')
-                    .insert({ ...expense, user_id: state.user.id })
-                    .select()
-                    .single();
-                if (error) { console.error('addExpense error', error); throw error; }
-                return data;
-            }
-
-            async function updateExpense(id, updates) {
-                if (!state.user) return;
-                const { data, error } = await supabase
-                    .from('expenses')
-                    .update(updates)
-                    .eq('id', id)
-                    .eq('user_id', state.user.id)
-                    .select()
-                    .single();
-                if (error) { console.error('updateExpense error', error); throw error; }
-                return data;
-            }
-
-            async function deleteExpense(id) {
-                if (!state.user) return;
-                const { error } = await supabase
-                    .from('expenses')
-                    .delete()
-                    .eq('id', id)
-                    .eq('user_id', state.user.id);
-                if (error) { console.error('deleteExpense error', error); throw error; }
-            }
-
-            // ---------- MODAL (ADD/EDIT) ----------
+            // ---------- OPEN EXPENSE MODAL ----------
             function openModal(exp) {
                 const isEdit = !!exp.id;
                 state.editing = {
@@ -2146,7 +1629,6 @@
                         } else {
                             await addExpense(record);
                         }
-                        // reload expenses
                         state.expenses = await loadExpenses();
                         closeModal();
                         render();
@@ -2446,11 +1928,9 @@
                         const incoming = Array.isArray(data.expenses) ? data.expenses : (Array.isArray(data) ? data :
                             null);
                         if (!incoming) throw new Error('invalid backup file');
-                        const existingIds = new Set(state.expenses.map(x => x.id));
                         let added = 0;
                         for (const exp of incoming) {
-                            if (exp && exp.amount && !existingIds.has(exp.id)) {
-                                // generate new id
+                            if (exp && exp.amount) {
                                 const newExp = { ...exp, id: undefined, user_id: state.user.id };
                                 await addExpense(newExp);
                                 added++;
@@ -2718,7 +2198,6 @@
 
             // ---------- INIT ----------
             async function init() {
-                // Check existing session
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
                     state.user = session.user;
@@ -2731,17 +2210,17 @@
                 }
                 render();
 
-                // Listen for auth changes
                 supabase.auth.onAuthStateChange((event, session) => {
                     if (event === 'SIGNED_IN' && session) {
                         state.user = session.user;
-                        // reload data
                         loadExpenses().then(exp => {
                             state.expenses = exp;
                             loadPrefs().then(() => {
-                                state.isAdmin = checkIsAdmin(session.user.id);
-                                state.screen = 'app';
-                                render();
+                                checkIsAdmin(session.user.id).then(isAdmin => {
+                                    state.isAdmin = isAdmin;
+                                    state.screen = 'app';
+                                    render();
+                                });
                             });
                         });
                     } else if (event === 'SIGNED_OUT') {
