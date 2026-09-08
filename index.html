@@ -15,9 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ===== আপনার আগের সব স্টাইল ===== */
-        /* আমি এখানে পুরো স্টাইল দিয়ে দিচ্ছি (সংক্ষেপে না দিয়ে) */
-
         :root {
             --ledger-green: #1F4B3F;
             --ledger-green-dark: #163a30;
@@ -75,7 +72,6 @@
             font-weight: 700;
         }
 
-        /* অ্যানিমেশন */
         @keyframes fadeIn {
             0% {
                 opacity: 0;
@@ -310,7 +306,6 @@
             }
         }
 
-        /* ===== AUTH ===== */
         .hk-auth-wrap {
             min-height: 100vh;
             display: flex;
@@ -483,7 +478,6 @@
             cursor: pointer;
         }
 
-        /* ===== APP HEADER ===== */
         .hk-spine {
             display: none;
         }
@@ -828,7 +822,6 @@
             padding: 18px 0 26px 0;
         }
 
-        /* ===== MODAL ===== */
         .hk-overlay {
             position: fixed;
             inset: 0;
@@ -1015,7 +1008,6 @@
             font-weight: 700;
         }
 
-        /* ===== ADMIN ===== */
         .ad-root {
             min-height: 100vh;
             background: var(--admin-bg);
@@ -1240,7 +1232,6 @@
             color: var(--ink-soft);
         }
 
-        /* ===== লোডিং ওভারলে ===== */
         .hk-global-loading {
             position: fixed;
             inset: 0;
@@ -1284,7 +1275,6 @@
             const SUPABASE_URL = 'https://hwtatkiexydjzgaxltpi.supabase.co';
             const SUPABASE_ANON_KEY = 'sb_publishable_zxoMyVHYFzhfbA5FYbdjrA_2dDnnr0H';
 
-            // ===== TRANSLATIONS (সংক্ষেপে) =====
             const L = {
                 bn: {
                     auth_sub: 'প্রতিদিনের খরচের সহজ হিসাব',
@@ -1315,6 +1305,7 @@
                     auth_error_pass_len: 'পাসওয়ার্ড কমপক্ষে ৪ ক্যারেক্টার হতে হবে',
                     auth_error_pass_match: 'পাসওয়ার্ড মিলছে না',
                     auth_error_exists: 'এই ইমেইল দিয়ে অ্যাকাউন্ট আছে, লগইন করুন',
+                    auth_confirm_needed: 'অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল কনফার্মেশন চালু আছে দেখে অটো লগইন হয়নি। Supabase Dashboard-এ Authentication > Sign In / Providers থেকে "Confirm email" বন্ধ করে আবার Login ট্যাব থেকে লগইন করুন, অথবা আপনার ইমেইলে পাঠানো কনফার্মেশন লিংকে ক্লিক করুন।',
                     app_subtitle: 'প্রতিদিনের খরচের হিসাব',
                     today: 'আজ',
                     this_week: 'এই সপ্তাহ',
@@ -1420,7 +1411,6 @@
                     please_wait: 'দয়া করে অপেক্ষা করুন...',
                 },
                 en: {
-                    // ... (ইংরেজি অনুবাদ, সংক্ষেপে)
                     auth_sub: 'Simple daily expense tracker',
                     login: 'Login',
                     signup: 'Sign Up',
@@ -1449,6 +1439,7 @@
                     auth_error_pass_len: 'Password must be at least 4 characters',
                     auth_error_pass_match: 'Passwords do not match',
                     auth_error_exists: 'An account with this email already exists. Please login.',
+                    auth_confirm_needed: 'Account created, but email confirmation is enabled so you were not auto logged in. Turn off "Confirm email" in Supabase Dashboard > Authentication, then login, or click the confirmation link sent to your email.',
                     app_subtitle: 'Daily expense tracker',
                     today: 'Today',
                     this_week: 'This Week',
@@ -1566,7 +1557,6 @@
                 return str;
             }
 
-            // ===== CATEGORIES & HELPERS =====
             const CATEGORIES = [
                 { id: 'food', em: '🍚', name: 'খাবার' },
                 { id: 'transport', em: '🚌', name: 'যাতায়াত' },
@@ -1615,10 +1605,10 @@
 
             function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
-            // ===== STATE =====
             let state = {
                 screen: 'loading',
                 authError: '',
+                authInfo: '',
                 user: null,
                 expenses: [],
                 filterCat: 'all',
@@ -1633,13 +1623,11 @@
                 lang: 'bn',
                 isAdmin: false,
                 allUsers: [],
-                isLoading: false, // global loading flag
+                isLoading: false,
             };
 
-            // ===== SUPABASE CLIENT =====
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // ===== LOADING OVERLAY =====
             function showLoading(message) {
                 const existing = document.querySelector('.hk-global-loading');
                 if (existing) existing.remove();
@@ -1662,7 +1650,6 @@
                 state.isLoading = false;
             }
 
-            // ===== DATA FUNCTIONS =====
             async function loadExpenses() {
                 if (!state.user) return [];
                 const { data, error } = await supabase
@@ -1716,7 +1703,6 @@
                 return !!data;
             }
 
-            // ===== AUTH FUNCTIONS =====
             async function signUp(email, password, name) {
                 const { data, error } = await supabase.auth.signUp({
                     email,
@@ -1737,7 +1723,6 @@
                 await supabase.auth.signOut();
             }
 
-            // ===== RENDER =====
             function render() {
                 const root = document.getElementById('hkApp');
                 if (state.screen === 'login' || state.screen === 'signup') root.innerHTML = renderAuth();
@@ -1750,7 +1735,6 @@
                 if (state.screen === 'admin') renderAdminBody();
             }
 
-            // ===== AUTH RENDER =====
             function renderAuth() {
                 const isLogin = state.screen === 'login';
                 const btnText = isLogin ? t('login_btn') : t('signup_btn');
@@ -1769,7 +1753,8 @@
                       <div class="hk-field"><label class="hk-label">${t('password')}</label>
                         <div class="hk-pw-wrap"><input class="hk-input" id="loginPass" type="password" placeholder="${t('pass_placeholder2')}"/><button type="button" class="hk-eye" data-target="loginPass">👁</button></div>
                       </div>
-                      ${state.authError ? `<div class="hk-error">${state.authError}</div>` : ''}
+                      ${state.authError ? `<div class="hk-error">${escapeHtml(state.authError)}</div>` : ''}
+                      ${state.authInfo ? `<div class="hk-error" style="color:var(--ledger-green);">${escapeHtml(state.authInfo)}</div>` : ''}
                       <button class="hk-btn-save" id="loginBtn" data-loading-text="${loadingText}"><span class="btn-text">${btnText}</span><span class="spinner"></span></button>
                       <div class="hk-auth-foot">${t('no_account')} <span class="hk-link" id="goSignup">${t('signup_link')}</span></div>
                     ` : `
@@ -1781,7 +1766,7 @@
                       <div class="hk-field"><label class="hk-label">${t('re_password')}</label>
                         <div class="hk-pw-wrap"><input class="hk-input" id="suPass2" type="password" placeholder="${t('pass_placeholder2')}"/><button type="button" class="hk-eye" data-target="suPass2">👁</button></div>
                       </div>
-                      ${state.authError ? `<div class="hk-error">${state.authError}</div>` : ''}
+                      ${state.authError ? `<div class="hk-error">${escapeHtml(state.authError)}</div>` : ''}
                       <button class="hk-btn-save" id="signupBtn" data-loading-text="${loadingText}"><span class="btn-text">${btnText}</span><span class="spinner"></span></button>
                       <div class="hk-auth-foot">${t('has_account')} <span class="hk-link" id="goLogin">${t('login_link')}</span></div>
                     `}
@@ -1800,14 +1785,13 @@
                     <div class="hk-field"><label class="hk-label">${t('password')}</label>
                       <div class="hk-pw-wrap"><input class="hk-input" id="adPass" type="password" placeholder="${t('pass_placeholder2')}"/><button type="button" class="hk-eye" data-target="adPass">👁</button></div>
                     </div>
-                    ${state.authError ? `<div class="hk-error">${state.authError}</div>` : ''}
+                    ${state.authError ? `<div class="hk-error">${escapeHtml(state.authError)}</div>` : ''}
                     <button class="hk-btn-save" id="adminLoginBtn" data-loading-text="${t('logging_in')}"><span class="btn-text">${t('admin_login_btn')}</span><span class="spinner"></span></button>
                     <div class="hk-auth-foot"><span class="hk-link" id="backToUserLogin">${t('back_user_login')}</span></div>
                   </div>
                 </div>`;
             }
 
-            // ===== APP RENDER =====
             function renderApp() {
                 const list = state.expenses;
                 const todaySum = sumFor(list, 'today'),
@@ -1915,7 +1899,6 @@
                 </div>`;
             }
 
-            // ===== ADMIN SHELL =====
             function renderAdminShell() {
                 return `
                 <div class="ad-root">
@@ -1936,7 +1919,6 @@
                 const body = document.getElementById('adminBody');
                 if (!body) return;
 
-                // Fetch all expenses grouped by user
                 const { data: expensesAll, error: expErr } = await supabase
                     .from('expenses')
                     .select('user_id, amount, datetime, category, payment, note');
@@ -2038,7 +2020,6 @@
                 }
             }
 
-            // ===== MODALS =====
             function openChangePasswordModal() {
                 const overlay = document.createElement('div');
                 overlay.className = 'hk-overlay';
@@ -2141,7 +2122,6 @@
                 };
             }
 
-            // ===== EXPENSE CRUD =====
             async function addExpense(expense) {
                 if (!state.user) return;
                 const { data, error } = await supabase
@@ -2176,7 +2156,6 @@
                 if (error) { console.error('deleteExpense error', error); throw error; }
             }
 
-            // ===== MODAL (ADD/EDIT) =====
             function openModal(exp) {
                 const isEdit = !!exp.id;
                 state.editing = {
@@ -2292,7 +2271,7 @@
                         render();
                     } catch (err) {
                         hideLoading();
-                        alert(t('err_network'));
+                        alert((err && err.message) ? err.message : t('err_network'));
                         console.error(err);
                     }
                 };
@@ -2308,7 +2287,7 @@
                             render();
                         } catch (err) {
                             hideLoading();
-                            alert(t('err_network'));
+                            alert((err && err.message) ? err.message : t('err_network'));
                             console.error(err);
                         }
                     };
@@ -2318,28 +2297,21 @@
             function closeModal() { const o = document.getElementById('hkOverlay'); if (o) o.remove();
                 state.editing = null; }
 
-            // ===== OTHER FUNCTIONS =====
             function openTotalDetailModal() {
-                // ... (পূর্বের মতো)
             }
 
             function openChartModal() {
-                // ... (পূর্বের মতো)
             }
 
             async function exportPDF() {
-                // ... (পূর্বের মতো)
             }
 
             function downloadBackup() {
-                // ... (পূর্বের মতো)
             }
 
             function triggerRestore() {
-                // ... (পূর্বের মতো)
             }
 
-            // ===== HELPERS FOR RENDER =====
             function withinRange(d, range) {
                 const now = new Date();
                 if (range === 'today') return dayKey(d) === dayKey(now);
@@ -2377,35 +2349,38 @@
                 });
             }
 
-            // ===== EVENT HANDLERS =====
             function attachHandlers() {
-                // Auth tabs
                 const tabLogin = document.getElementById('tabLogin');
                 const tabSignup = document.getElementById('tabSignup');
                 if (tabLogin) tabLogin.onclick = () => { state.screen = 'login';
                     state.authError = '';
+                    state.authInfo = '';
                     render(); };
                 if (tabSignup) tabSignup.onclick = () => { state.screen = 'signup';
                     state.authError = '';
+                    state.authInfo = '';
                     render(); };
                 const goLogin = document.getElementById('goLogin');
                 if (goLogin) goLogin.onclick = () => { state.screen = 'login';
                     state.authError = '';
+                    state.authInfo = '';
                     render(); };
                 const goSignup = document.getElementById('goSignup');
                 if (goSignup) goSignup.onclick = () => { state.screen = 'signup';
                     state.authError = '';
+                    state.authInfo = '';
                     render(); };
                 const goAdmin = document.getElementById('goAdmin');
                 if (goAdmin) goAdmin.onclick = () => { state.screen = 'adminlogin';
                     state.authError = '';
+                    state.authInfo = '';
                     render(); };
                 const backToUserLogin = document.getElementById('backToUserLogin');
                 if (backToUserLogin) backToUserLogin.onclick = () => { state.screen = 'login';
                     state.authError = '';
+                    state.authInfo = '';
                     render(); };
 
-                // Login
                 const loginBtn = document.getElementById('loginBtn');
                 if (loginBtn) loginBtn.onclick = async () => {
                     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -2415,23 +2390,25 @@
                     loginBtn.disabled = true;
                     loginBtn.classList.add('loading');
                     try {
-                        const { user } = await signIn(email, pass);
+                        const { user, session } = await signIn(email, pass);
+                        if (!session || !user) throw new Error('no-session');
                         state.user = user;
                         state.isAdmin = await checkIsAdmin(user.id);
                         state.expenses = await loadExpenses();
                         await loadPrefs();
                         state.screen = 'app';
                         state.authError = '';
+                        state.authInfo = '';
                         render();
                     } catch (err) {
-                        state.authError = t('auth_error_login');
+                        console.error('login error', err);
+                        state.authError = (err && err.message && err.message !== 'no-session') ? err.message : t('auth_error_login');
                         loginBtn.disabled = false;
                         loginBtn.classList.remove('loading');
                         render();
                     }
                 };
 
-                // Signup
                 const signupBtn = document.getElementById('signupBtn');
                 if (signupBtn) signupBtn.onclick = async () => {
                     const name = document.getElementById('suName').value.trim();
@@ -2449,7 +2426,17 @@
                     signupBtn.disabled = true;
                     signupBtn.classList.add('loading');
                     try {
-                        const { user } = await signUp(email, pass, name);
+                        const { user, session } = await signUp(email, pass, name);
+                        if (!session) {
+                            // Email confirmation is enabled in Supabase — no session yet.
+                            state.screen = 'login';
+                            state.authError = '';
+                            state.authInfo = t('auth_confirm_needed');
+                            signupBtn.disabled = false;
+                            signupBtn.classList.remove('loading');
+                            render();
+                            return;
+                        }
                         state.user = user;
                         state.isAdmin = await checkIsAdmin(user.id);
                         state.expenses = [];
@@ -2459,16 +2446,22 @@
                         await savePrefs();
                         state.screen = 'app';
                         state.authError = '';
+                        state.authInfo = '';
                         render();
                     } catch (err) {
-                        state.authError = t('auth_error_exists');
+                        console.error('signup error', err);
+                        const msg = (err && err.message) ? err.message.toLowerCase() : '';
+                        if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+                            state.authError = t('auth_error_exists');
+                        } else {
+                            state.authError = (err && err.message) ? err.message : t('err_network');
+                        }
                         signupBtn.disabled = false;
                         signupBtn.classList.remove('loading');
                         render();
                     }
                 };
 
-                // Admin Login
                 const adminLoginBtn = document.getElementById('adminLoginBtn');
                 if (adminLoginBtn) adminLoginBtn.onclick = async () => {
                     const email = document.getElementById('adEmail').value.trim().toLowerCase();
@@ -2476,7 +2469,8 @@
                     adminLoginBtn.disabled = true;
                     adminLoginBtn.classList.add('loading');
                     try {
-                        const { user } = await signIn(email, pass);
+                        const { user, session } = await signIn(email, pass);
+                        if (!session || !user) throw new Error('no-session');
                         const isAdmin = await checkIsAdmin(user.id);
                         if (!isAdmin) { state.authError = 'You are not an admin.';
                             adminLoginBtn.disabled = false;
@@ -2488,14 +2482,14 @@
                         state.authError = '';
                         render();
                     } catch (err) {
-                        state.authError = t('auth_error_login');
+                        console.error('admin login error', err);
+                        state.authError = (err && err.message && err.message !== 'no-session') ? err.message : t('auth_error_login');
                         adminLoginBtn.disabled = false;
                         adminLoginBtn.classList.remove('loading');
                         render();
                     }
                 };
 
-                // App menu
                 const menuBtn = document.getElementById('hkMenuBtn');
                 const menuPanel = document.getElementById('hkMenuPanel');
                 if (menuBtn && menuPanel) {
@@ -2569,7 +2563,6 @@
                     };
                 }
 
-                // Stats filter
                 document.querySelectorAll('.hk-stat').forEach(el => {
                     el.onclick = () => { const r = el.getAttribute('data-range');
                         state.filterRange = state.filterRange === r ? 'all' : r;
@@ -2591,7 +2584,6 @@
                 const addBtn = document.getElementById('hkAddBtn');
                 if (addBtn) addBtn.onclick = () => openModal({});
 
-                // Admin logout
                 const adminLogoutBtn = document.getElementById('adminLogoutBtn');
                 if (adminLogoutBtn) adminLogoutBtn.onclick = async () => {
                     showLoading(t('please_wait'));
@@ -2606,13 +2598,12 @@
                 wireEyeToggles(document);
             }
 
-            // ===== CHART & TOTAL MODAL (minimal) =====
             function openTotalDetailModal() {
-                alert('এই ফিচারটি সংক্ষেপে দেখানো হয়েছে। সম্পূর্ণ কোডে এটি কাজ করবে।');
+                alert('এই ফিচারটি সংক্ষেপে দেখানো হয়েছে। সম্পূর্ণ কোডে এটি কাজ করবে।');
             }
 
             function openChartModal() {
-                alert('এই ফিচারটি সংক্ষেপে দেখানো হয়েছে। সম্পূর্ণ কোডে এটি কাজ করবে।');
+                alert('এই ফিচারটি সংক্ষেপে দেখানো হয়েছে। সম্পূর্ণ কোডে এটি কাজ করবে।');
             }
 
             async function exportPDF() {
@@ -2668,7 +2659,6 @@
                 input.click();
             }
 
-            // ===== BUILD CHART SVGS (dummy) =====
             function buildBarChartSVG(labels, values) {
                 return `<div style="padding:10px; background:var(--paper-line); border-radius:8px; color:var(--ink-soft);">📊 Chart: ${labels.join(', ')}</div>`;
             }
@@ -2677,7 +2667,6 @@
                 return `<div style="padding:10px; background:var(--paper-line); border-radius:8px; color:var(--ink-soft);">🍩 Donut Chart</div>`;
             }
 
-            // ===== INIT =====
             async function init() {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
@@ -2714,7 +2703,6 @@
                 });
             }
 
-            // Expose functions globally for debugging
             window.__H = { state, supabase, loadExpenses, render };
 
             init();
