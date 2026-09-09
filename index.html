@@ -1,539 +1,1510 @@
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HisabGo — খরচের হিসাব</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
 
-    :root{
-      --ledger-green:#1F4B3F;
-      --ledger-green-dark:#163a30;
-      --paper:#F7F1E4;
-      --paper-line:#E3D9C3;
-      --ink:#2B2620;
-      --ink-soft:#6b6255;
-      --red:#A83232;
-      --red-soft:#c95c5c;
-      --gold:#C79A3D;
-      --card:#FFFDF8;
+:root{
+  --ledger-green:#1F4B3F;
+  --ledger-green-dark:#163a30;
+  --paper:#F7F1E4;
+  --paper-line:#E3D9C3;
+  --ink:#2B2620;
+  --ink-soft:#6b6255;
+  --red:#A83232;
+  --red-soft:#c95c5c;
+  --gold:#C79A3D;
+  --card:#FFFDF8;
 
-      --admin-bg:#101720;
-      --admin-panel:#182230;
-      --admin-panel2:#1f2c3d;
-      --admin-text:#E8EDF2;
-      --admin-muted:#8CA0B3;
-      --admin-accent:#4FD1C5;
-      --admin-danger:#E2574C;
-      --admin-line:#2a3a4d;
+  --admin-bg:#101720;
+  --admin-panel:#182230;
+  --admin-panel2:#1f2c3d;
+  --admin-text:#E8EDF2;
+  --admin-muted:#8CA0B3;
+  --admin-accent:#4FD1C5;
+  --admin-danger:#E2574C;
+  --admin-line:#2a3a4d;
+}
+
+*{box-sizing:border-box;}
+body{ margin:0; padding:0; }
+
+/* ---- animations & snappy transitions ---- */
+@keyframes hkSpin{ to{ transform:rotate(360deg); } }
+.hk-spinner{ display:inline-block; width:15px; height:15px; border:2px solid rgba(255,255,255,0.45); border-top-color:#fff; border-radius:50%; animation:hkSpin 0.55s linear infinite; vertical-align:middle; margin-right:7px; }
+@keyframes hkFadeIn{ from{ opacity:0; transform:translateY(5px); } to{ opacity:1; transform:translateY(0); } }
+.hk-fade-in{ animation:hkFadeIn 0.2s ease; }
+button, .hk-chip, .hk-cat-opt, .hk-pay-opt, .hk-stat, .hk-menu-item, .hk-row, .ad-btn, .ad-user-top, .hk-tab, .hk-link{
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+}
+.hk-add-btn:active, .hk-btn-save:active, .hk-btn-delete:active, .hk-chip:active, .hk-cat-opt:active, .hk-pay-opt:active, .hk-menu-item:active{ transform:scale(0.96); }
+.hk-input, .hk-select, .hk-textarea, .hk-search-input{ transition: border-color 0.12s ease, box-shadow 0.12s ease; }
+.hk-input:focus, .hk-textarea:focus, .hk-search-input:focus{ outline:none; border-color:var(--ledger-green); box-shadow:0 0 0 3px rgba(31,75,63,0.12); }
+.hk-budget-fg{ transition: width 0.4s ease; }
+
+body.theme-dark{
+  --paper:#121A20;
+  --paper-line:#26333d;
+  --ink:#EAF1F5;
+  --ink-soft:#93A6B3;
+  --card:#1B252D;
+  --ledger-green:#2F6A56;
+  --ledger-green-dark:#1c4437;
+}
+body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:0; padding:0; }
+.hk-root{ max-width:640px; margin:0 auto; min-height:100vh; background:var(--paper); position:relative; }
+.hk-brand{ font-family:'Poppins',sans-serif; font-weight:700; }
+
+/* ---------- AUTH SCREENS ---------- */
+.hk-auth-wrap{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:
+    repeating-linear-gradient(var(--paper), var(--paper) 33px, var(--paper-line) 34px);
+  padding:30px 18px;
+}
+.hk-auth-card{
+  background:var(--card); border:1px solid var(--paper-line); border-radius:18px;
+  padding:28px 26px; width:100%; max-width:380px; box-shadow:0 10px 30px rgba(31,75,63,0.08);
+}
+.hk-auth-logo{ text-align:center; margin-bottom:4px; }
+.hk-auth-logo .hk-brand{ font-size:26px; color:var(--ledger-green); }
+.hk-auth-logo .em{ font-size:26px; margin-right:4px; }
+.hk-auth-sub{ text-align:center; color:var(--ink-soft); font-size:13px; margin-bottom:20px; }
+.hk-tabs{ display:flex; background:var(--paper); border-radius:11px; padding:4px; margin-bottom:20px; }
+.hk-tab{ flex:1; text-align:center; padding:9px; border-radius:8px; font-size:13.5px; font-weight:600; cursor:pointer; color:var(--ink-soft); }
+.hk-tab.active{ background:var(--ledger-green); color:#fff; }
+.hk-field{ margin-bottom:14px; }
+.hk-label{ display:block; font-size:12.5px; color:var(--ink-soft); margin-bottom:5px; font-weight:600; }
+.hk-input,.hk-select,.hk-textarea{
+  width:100%; border:1px solid var(--paper-line); border-radius:9px; padding:10px 11px;
+  font-family:'Hind Siliguri',sans-serif; font-size:14.5px; background:#fff; color:var(--ink);
+}
+.hk-textarea{ resize:vertical; min-height:44px; }
+.hk-btn-save{
+  width:100%; background:var(--ledger-green); color:#fff; border:none; border-radius:10px;
+  padding:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Hind Siliguri',sans-serif;
+}
+.hk-error{ color:var(--red); font-size:12.5px; margin-top:-6px; margin-bottom:10px; }
+.hk-pw-wrap{ position:relative; }
+.hk-pw-wrap .hk-input{ padding-right:40px; }
+.hk-eye{ position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:16px; padding:6px; line-height:1; }
+.hk-auth-foot{ text-align:center; margin-top:16px; font-size:12px; }
+.hk-link{ color:var(--ledger-green); font-weight:700; cursor:pointer; text-decoration:underline; }
+.hk-admin-link{ text-align:center; margin-top:14px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; }
+.hk-lang-toggle{ font-size:11px; color:var(--ledger-green); font-weight:700; cursor:pointer; text-decoration:underline; }
+
+/* ---------- APP HEADER ---------- */
+.hk-spine{ display:none; }
+.hk-header{ background:var(--ledger-green); color:var(--paper); padding:18px 24px 20px 24px; border-radius:0 0 18px 18px; position:relative; }
+.hk-header-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+.hk-title{ font-size:24px; margin:0 0 2px 0; letter-spacing:0.3px; }
+.hk-subtitle{ font-size:12.5px; color:#cfe0d8; margin:0; }
+.hk-user-chip{ display:flex; align-items:center; gap:8px; }
+.hk-user-name{ font-size:12.5px; color:#e7f0eb; font-weight:600; }
+.hk-menu-wrap{ position:relative; }
+.hk-menu-btn{ width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.14); border:none; color:#fff; font-size:17px; cursor:pointer; line-height:1; }
+.hk-menu-btn:hover{ background:rgba(255,255,255,0.22); }
+.hk-menu-panel{ position:absolute; top:calc(100% + 8px); right:0; min-width:215px; max-height:75vh; overflow-y:auto; background:var(--card); border:1px solid var(--paper-line); border-radius:12px; box-shadow:0 10px 26px rgba(0,0,0,0.18); padding:6px; z-index:60; }
+.hk-menu-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 11px; border-radius:8px; font-size:13px; color:var(--ink); cursor:pointer; }
+.hk-menu-item:hover{ background:var(--paper); }
+.hk-menu-right{ font-size:11px; color:var(--ink-soft); }
+.hk-menu-divider{ height:1px; background:var(--paper-line); margin:5px 4px; }
+.hk-menu-danger{ color:var(--red); }
+.hk-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.hk-stat{ background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:10px 8px; text-align:center; cursor:pointer; }
+.hk-stat:hover{ background:rgba(255,255,255,0.16); }
+.hk-stat.active{ background:var(--gold); border-color:var(--gold); }
+.hk-stat.active .hk-stat-label,.hk-stat.active .hk-stat-amt{ color:var(--ledger-green-dark); }
+.hk-stat-label{ font-size:11.5px; color:#d8e6df; margin-bottom:4px; }
+.hk-stat-amt{ font-size:17px; font-weight:700; color:#fff; }
+.hk-budget-bar-wrap{ margin-top:14px; }
+.hk-budget-top{ display:flex; justify-content:space-between; font-size:11.5px; color:#d8e6df; margin-bottom:5px; }
+.hk-budget-bg{ height:8px; background:rgba(255,255,255,0.18); border-radius:5px; overflow:hidden; }
+.hk-budget-fg{ height:100%; background:var(--gold); border-radius:5px; }
+.hk-budget-fg.warn{ background:#e2a33d; }
+.hk-budget-fg.over{ background:var(--red-soft); }
+.hk-budget-warn{ font-size:11px; color:#ffe1b3; margin-top:5px; }
+.hk-search-input{ width:100%; border:1px solid var(--paper-line); border-radius:10px; padding:10px 12px; font-size:13.5px; margin-bottom:12px; background:var(--card); color:var(--ink); font-family:'Hind Siliguri',sans-serif; }
+
+.hk-body{ padding:18px 20px 90px 20px; }
+.hk-add-btn{
+  width:100%; background:var(--gold); color:var(--ledger-green-dark); border:none; border-radius:12px;
+  padding:13px; font-size:15.5px; font-weight:700; cursor:pointer; margin-bottom:18px; box-shadow:0 2px 0 #a97f2a;
+}
+.hk-add-btn:active{ transform:translateY(2px); box-shadow:none; }
+.hk-filters{ display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:8px; }
+.hk-chip{ flex:0 0 auto; background:var(--card); border:1px solid var(--paper-line); border-radius:20px; padding:6px 13px; font-size:13.5px; cursor:pointer; white-space:nowrap; color:var(--ink-soft); }
+.hk-chip.active{ background:var(--ledger-green); border-color:var(--ledger-green); color:#fff; }
+.hk-section-title{ font-family:'Tiro Bangla',serif; font-size:16px; color:var(--ledger-green); margin:22px 0 10px 0; padding-bottom:6px; border-bottom:1px dashed var(--paper-line); }
+.hk-day-label{ font-size:12.5px; color:var(--ink-soft); margin:14px 0 6px 2px; font-weight:600; }
+.hk-row{ background:var(--card); border:1px solid var(--paper-line); border-left:3px solid var(--ledger-green); border-radius:10px; padding:11px 12px; display:flex; align-items:center; gap:10px; margin-bottom:8px; cursor:pointer; }
+.hk-row-icon{ font-size:20px; flex:0 0 auto; }
+.hk-row-main{ flex:1; min-width:0; }
+.hk-row-cat{ font-size:14.5px; font-weight:600; }
+.hk-row-note{ font-size:12.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hk-row-right{ text-align:right; flex:0 0 auto; }
+.hk-row-amt{ font-size:15px; font-weight:700; color:var(--red); }
+.hk-row-pay{ font-size:11px; color:var(--ink-soft); }
+.hk-row-thumb{ width:34px;height:34px;border-radius:6px;object-fit:cover;flex:0 0 auto; border:1px solid var(--paper-line);}
+.hk-empty{ text-align:center; color:var(--ink-soft); font-size:14px; padding:40px 10px; border:1px dashed var(--paper-line); border-radius:12px; background:var(--card); }
+.hk-breakdown-row{ margin-bottom:10px; }
+.hk-breakdown-top{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; }
+.hk-breakdown-bar-bg{ height:8px; background:var(--paper-line); border-radius:5px; overflow:hidden; }
+.hk-breakdown-bar-fg{ height:100%; background:var(--ledger-green); border-radius:5px; }
+.hk-footer{ text-align:center; font-size:11.5px; color:var(--ink-soft); padding:18px 0 26px 0; }
+
+/* Modal (add/edit expense) */
+.hk-overlay{ position:fixed; inset:0; background:rgba(20,20,15,0.45); display:flex; align-items:flex-end; justify-content:center; z-index:50; animation:hkOverlayFade 0.15s ease; }
+@keyframes hkOverlayFade{ from{ background:rgba(20,20,15,0); } to{ background:rgba(20,20,15,0.45); } }
+.hk-modal{ background:repeating-linear-gradient(var(--card), var(--card) 33px, var(--paper-line) 34px); width:100%; max-width:640px; border-radius:20px 20px 0 0; padding:20px 20px 24px 20px; max-height:88vh; overflow-y:auto; animation:hkSlideUp 0.16s ease; }
+@keyframes hkSlideUp{ from{ transform:translateY(18px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+.hk-modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.hk-modal-title{ font-family:'Tiro Bangla',serif; font-size:19px; color:var(--ledger-green); }
+.hk-close{ background:none; border:none; font-size:20px; color:var(--ink-soft); cursor:pointer; padding:4px 8px; }
+.hk-cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.hk-cat-opt{ border:1.5px solid var(--paper-line); border-radius:11px; padding:9px 4px; text-align:center; font-size:11.5px; cursor:pointer; background:#fff; color:var(--ink-soft); }
+.hk-cat-opt .em{ font-size:19px; display:block; margin-bottom:3px; }
+.hk-cat-opt.active{ border-color:var(--ledger-green); background:#eaf2ee; color:var(--ledger-green); font-weight:700; }
+.hk-pay-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.hk-pay-opt{ border:1.5px solid var(--paper-line); border-radius:20px; padding:7px 13px; font-size:13px; cursor:pointer; background:#fff; color:var(--ink-soft); }
+.hk-pay-opt.active{ border-color:var(--gold); background:#fbf1dc; color:#8a6a1f; font-weight:700; }
+.hk-upload-box{ border:1.5px dashed var(--paper-line); border-radius:11px; padding:14px; text-align:center; font-size:13px; color:var(--ink-soft); cursor:pointer; position:relative; }
+.hk-upload-preview{ max-width:100%; max-height:130px; border-radius:8px; margin-top:8px; }
+.hk-upload-box input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+.hk-modal-actions{ display:flex; gap:10px; margin-top:6px; }
+.hk-btn-delete{ background:#fff; color:var(--red); border:1.5px solid var(--red-soft); border-radius:10px; padding:12px 16px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Hind Siliguri',sans-serif; }
+.hk-loading{ text-align:center; padding:60px 10px; color:var(--ink-soft); font-size:14px; }
+.hk-pdf-loading{ position:fixed; inset:0; background:rgba(15,15,10,0.55); display:flex; align-items:center; justify-content:center; z-index:100; color:#fff; font-size:14px; text-align:center; padding:20px; }
+.hk-toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:#2B2620; color:#fff; padding:12px 18px; border-radius:10px; font-size:13px; max-width:88%; text-align:center; z-index:200; box-shadow:0 8px 22px rgba(0,0,0,0.25); animation:hkToastIn 0.2s ease; }
+.hk-toast-out{ animation:hkToastOut 0.25s ease forwards; }
+@keyframes hkToastIn{ from{ opacity:0; transform:translateX(-50%) translateY(10px); } to{ opacity:1; transform:translateX(-50%) translateY(0); } }
+@keyframes hkToastOut{ to{ opacity:0; transform:translateX(-50%) translateY(10px); } }
+.hk-legend-row{ display:flex; align-items:center; gap:7px; font-size:12.5px; margin-bottom:7px; }
+.hk-legend-dot{ width:10px; height:10px; border-radius:3px; flex:0 0 auto; }
+.hk-legend-label{ flex:1; }
+.hk-legend-pct{ font-weight:700; }
+
+/* ---------- ADMIN PANEL (visually separate) ---------- */
+.ad-root{ min-height:100vh; background:var(--admin-bg); color:var(--admin-text); font-family:'Hind Siliguri',sans-serif; }
+.ad-wrap{ max-width:920px; margin:0 auto; padding:0 0 60px 0; }
+.ad-header{ display:flex; justify-content:space-between; align-items:center; padding:20px 22px; border-bottom:1px solid var(--admin-line); }
+.ad-brand{ font-size:19px; color:var(--admin-accent); }
+.ad-brand .tag{ font-size:11px; color:var(--admin-muted); display:block; margin-top:2px; font-weight:400; }
+.ad-logout{ font-size:12.5px; color:var(--admin-muted); border:1px solid var(--admin-line); padding:7px 13px; border-radius:8px; cursor:pointer; }
+.ad-logout:hover{ color:var(--admin-text); border-color:var(--admin-accent); }
+.ad-body{ padding:20px 22px; }
+.ad-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px; }
+.ad-stat{ background:var(--admin-panel); border:1px solid var(--admin-line); border-radius:12px; padding:14px; }
+.ad-stat-label{ font-size:11.5px; color:var(--admin-muted); margin-bottom:6px; }
+.ad-stat-val{ font-size:20px; font-weight:700; color:var(--admin-text); }
+.ad-search{ width:100%; background:var(--admin-panel); border:1px solid var(--admin-line); border-radius:10px; padding:11px 14px; color:var(--admin-text); font-size:13.5px; margin-bottom:16px; font-family:'Hind Siliguri',sans-serif; }
+.ad-search::placeholder{ color:var(--admin-muted); }
+.ad-section-title{ font-size:14px; color:var(--admin-muted); margin:0 0 12px 0; text-transform:none; }
+.ad-user-card{ background:var(--admin-panel); border:1px solid var(--admin-line); border-radius:12px; margin-bottom:10px; overflow:hidden; }
+.ad-user-top{ display:flex; align-items:center; gap:12px; padding:14px; cursor:pointer; }
+.ad-avatar{ width:38px; height:38px; border-radius:50%; background:var(--admin-accent); color:#0b1116; display:flex; align-items:center; justify-content:center; font-weight:700; flex:0 0 auto; }
+.ad-user-info{ flex:1; min-width:0; }
+.ad-user-name{ font-size:14.5px; font-weight:600; }
+.ad-user-email{ font-size:12px; color:var(--admin-muted); }
+.ad-user-meta{ text-align:right; font-size:12px; color:var(--admin-muted); flex:0 0 auto; }
+.ad-user-meta .amt{ color:var(--admin-accent); font-weight:700; font-size:14px; display:block; }
+.ad-user-actions{ display:flex; gap:8px; padding:0 14px 14px 14px; }
+.ad-btn{ font-size:12px; border-radius:8px; padding:7px 12px; cursor:pointer; border:1px solid var(--admin-line); background:transparent; color:var(--admin-muted); font-family:'Hind Siliguri',sans-serif; }
+.ad-btn:hover{ color:var(--admin-text); }
+.ad-btn-danger{ color:var(--admin-danger); border-color:rgba(226,87,76,0.4); }
+.ad-btn-danger:hover{ background:rgba(226,87,76,0.1); }
+.ad-detail{ border-top:1px solid var(--admin-line); padding:14px; background:var(--admin-panel2); }
+.ad-empty{ text-align:center; color:var(--admin-muted); padding:40px; border:1px dashed var(--admin-line); border-radius:12px; }
+.ad-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--admin-line); font-size:13px; }
+.ad-row:last-child{ border-bottom:none; }
+.ad-row .cat{ color:var(--admin-text); }
+.ad-row .amt{ color:var(--admin-accent); font-weight:600; }
+.ad-foot{ text-align:center; font-size:11px; color:var(--admin-muted); padding:20px 0; }
+</style>
+
+<div id="hkApp"></div>
+
+<script>
+(function(){
+  const CATEGORIES = [
+    {id:'food', em:'🍚', bn:'খাবার', en:'Food'},
+    {id:'transport', em:'🚌', bn:'যাতায়াত', en:'Transport'},
+    {id:'market', em:'🛒', bn:'বাজার', en:'Groceries'},
+    {id:'home', em:'🏠', bn:'বাসা', en:'Rent/Home'},
+    {id:'net', em:'📱', bn:'মোবাইল/ইন্টারনেট', en:'Mobile/Internet'},
+    {id:'edu', em:'🎓', bn:'পড়াশোনা', en:'Education'},
+    {id:'medical', em:'💊', bn:'চিকিৎসা', en:'Medical'},
+    {id:'fun', em:'🎮', bn:'বিনোদন', en:'Entertainment'},
+    {id:'fuel', em:'🏍️', bn:'বাইক ফুয়েল', en:'Bike Fuel'},
+    {id:'shopping', em:'🛍', bn:'Shopping', en:'Shopping'},
+    {id:'other', em:'📦', bn:'অন্যান্য', en:'Others'},
+  ];
+  const PAYMENTS = ['ক্যাশ','bKash','Nagad','Rocket','কার্ড','ব্যাংক ট্রান্সফার'];
+  const PAY_EN = {'ক্যাশ':'Cash','কার্ড':'Card','ব্যাংক ট্রান্সফার':'Bank Transfer'};
+  const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+  const BN_MONTHS_SHORT = ['জান','ফেব্র','মার্চ','এপ্রি','মে','জুন','জুলা','আগ','সেপ্ট','অক্ট','নভে','ডিসে'];
+  const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const EN_MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // ---- Translation dictionary ----
+  const STR = {
+    bn: {
+      app_subtitle:'প্রতিদিনের খরচের হিসাব',
+      auth_subtitle:'প্রতিদিনের খরচের সহজ হিসাব',
+      tab_login:'লগইন', tab_signup:'সাইন আপ',
+      label_email:'ইমেইল', label_password:'পাসওয়ার্ড', label_name:'নাম',
+      label_confirm_password:'পাসওয়ার্ড আবার লিখুন',
+      login_btn:'লগইন করুন', signup_btn:'অ্যাকাউন্ট তৈরি করুন',
+      no_account:'অ্যাকাউন্ট নেই?', has_account:'অ্যাকাউন্ট আছে?',
+      remember_me:'এই ডিভাইসে মনে রাখুন',
+      go_signup:'সাইন আপ করুন', go_login:'লগইন করুন',
+      admin_login_link:'Admin Login →', admin_panel_title:'Admin Panel প্রবেশ',
+      admin_email:'Admin ইমেইল', back_to_user_login:'← ব্যবহারকারী লগইনে ফিরুন',
+      err_fill_all:'সব ঘর পূরণ করুন', err_valid_email:'সঠিক ইমেইল দিন',
+      err_pw_len:'পাসওয়ার্ড কমপক্ষে ৪ ক্যারেক্টার হতে হবে', err_pw_match:'পাসওয়ার্ড মিলছে না',
+      err_email_exists:'এই ইমেইল দিয়ে অ্যাকাউন্ট আছে, লগইন করুন',
+      err_login_fail:'ইমেইল অথবা পাসওয়ার্ড ভুল', err_fill_email_pw:'ইমেইল ও পাসওয়ার্ড দিন',
+      err_admin_login_fail:'Admin ইমেইল বা পাসওয়ার্ড ভুল',
+      stat_today:'আজ', stat_week:'এই সপ্তাহ', stat_month:'এই মাস',
+      add_expense_btn:'+ নতুন খরচ যোগ করুন',
+      search_placeholder:'🔍 নোট, ক্যাটাগরি বা পেমেন্ট মাধ্যম দিয়ে খুঁজুন...',
+      filter_all:'সব',
+      empty_expenses:'এখনো কোনো খরচ যোগ করা হয়নি।<br/>উপরের বাটনে চাপ দিয়ে প্রথম খরচটি লিখুন।',
+      section_month_breakdown:'এই মাসের খাত অনুযায়ী খরচ',
+      today_label:'আজ', yesterday_label:'গতকাল',
+      footer_credit:'Developed by Imrul',
+      menu_total_expense:'💰 মোট খরচ', menu_theme:'🌓 থিম', menu_profile:'👤 প্রোফাইল',
+      menu_change_pw:'🔑 পাসওয়ার্ড পরিবর্তন', menu_budget:'🎯 মাসিক বাজেট',
+      menu_chart:'📊 চার্ট দেখুন', menu_export_pdf:'📥 PDF এক্সপোর্ট',
+      menu_backup:'⬇️ ব্যাকআপ ডাউনলোড', menu_restore:'⬆️ ব্যাকআপ পুনরুদ্ধার',
+      menu_logout:'🚪 লগআউট', menu_language:'🌐 ভাষা',
+      modal_add_expense:'নতুন খরচ', modal_edit_expense:'খরচ সম্পাদনা',
+      label_amount:'Amount (৳)', amount_placeholder:'যেমন: ১৫০', err_amount:'টাকার পরিমাণ লিখুন',
+      label_datetime:'তারিখ ও সময়', label_category:'Category', label_payment:'Payment Method',
+      label_note:'Note', note_placeholder:'ছোট নোট (ঐচ্ছিক)', label_receipt:'ছবি/রসিদ',
+      upload_change:'ছবি পরিবর্তন করতে চাপ দিন', upload_new:'রসিদের ছবি আপলোড করতে চাপ দিন',
+      btn_delete:'মুছে ফেলুন', btn_update:'আপডেট করুন', btn_save:'সংরক্ষণ করুন',
+      confirm_delete_expense:'আপনি কি নিশ্চিত এই খরচটি মুছে ফেলতে চান?',
+      modal_change_pw:'পাসওয়ার্ড পরিবর্তন করুন', label_current_pw:'বর্তমান পাসওয়ার্ড',
+      label_new_pw:'নতুন পাসওয়ার্ড', label_confirm_new_pw:'নতুন পাসওয়ার্ড আবার লিখুন',
+      btn_change:'পরিবর্তন করুন', err_current_pw:'বর্তমান পাসওয়ার্ড ভুল',
+      err_new_pw_match:'নতুন পাসওয়ার্ড দুটো মিলছে না', pw_changed:'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে।',
+      modal_profile:'প্রোফাইল', err_name_empty:'নাম খালি রাখা যাবে না',
+      modal_budget:'মাসিক বাজেট নির্ধারণ', label_budget_amount:'প্রতি মাসের বাজেট (৳)',
+      budget_placeholder:'যেমন: ১৫০০০', budget_hint:'বাজেটের ৮০% পার হলে ড্যাশবোর্ডে সতর্ক করা হবে। ০ বা খালি রাখলে বাজেট বন্ধ থাকবে।',
+      budget_label_dash:'মাসিক বাজেট', budget_over:'⚠️ বাজেট শেষ! নির্ধারিত সীমার চেয়ে',
+      budget_over_suffix:'বেশি খরচ হয়েছে', budget_warn:'⚠️ বাজেটের',
+      budget_warn_suffix:'% ব্যবহার হয়ে গেছে',
+      modal_chart:'চার্ট ও বিশ্লেষণ', chart_last7:'গত ৭ দিনের খরচ', chart_month_cat:'এই মাসের ক্যাটাগরি বণ্টন',
+      chart_no_data:'এই মাসে কোনো খরচ নেই।',
+      modal_total:'মোট খরচের বিস্তারিত তথ্য', total_alltime:'সর্বমোট খরচ', total_entries:'মোট এন্ট্রি',
+      total_avg_monthly:'গড় মাসিক খরচ', total_top_month:'সর্বোচ্চ খরচের মাস:',
+      total_trend6:'গত ৬ মাসের প্রবণতা', total_by_month:'মাস অনুযায়ী হিসাব',
+      total_by_cat:'খাত অনুযায়ী সর্বমোট খরচ', entries_suffix:'টি এন্ট্রি',
+      backup_confirm:'টি এন্ট্রি পুনরুদ্ধার হয়েছে।', backup_invalid:'ফাইলটি সঠিক HisabGo ব্যাকআপ ফাইল নয় বা পড়া যায়নি।',
+      pdf_generating:'PDF তৈরি হচ্ছে, একটু অপেক্ষা করুন...', pdf_fail:'PDF তৈরি করা যায়নি। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।',
+      pdf_title:'HisabGo — খরচের রিপোর্ট', pdf_generated:'তৈরি হয়েছে', pdf_total_line:'মোট খরচ:',
+      pdf_col_date:'তারিখ', pdf_col_cat:'ক্যাটাগরি', pdf_col_pay:'মাধ্যম', pdf_col_note:'নোট', pdf_col_amt:'টাকা',
+      pdf_no_data:'কোনো খরচ নেই',
+      storage_save_fail:'ডেটা সংরক্ষণ করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।',
+      storage_too_large:'আপনার খরচের তালিকা (রশিদের ছবিসহ) অনেক বড় হয়ে গেছে। কিছু পুরনো রশিদের ছবি মুছে ফেলুন বা ব্যাকআপ ডাউনলোড করে রাখুন।',
+      check_email_confirm:'অ্যাকাউন্ট তৈরি হয়েছে! লগইন করার আগে আপনার ইমেইল ইনবক্স চেক করে ভেরিফাই করুন।',
+    },
+    en: {
+      app_subtitle:'Your daily expense ledger',
+      auth_subtitle:'Simple daily expense tracking',
+      tab_login:'Login', tab_signup:'Sign Up',
+      label_email:'Email', label_password:'Password', label_name:'Name',
+      label_confirm_password:'Confirm Password',
+      login_btn:'Log In', signup_btn:'Create Account',
+      no_account:"Don't have an account?", has_account:'Already have an account?',
+      remember_me:'Remember me on this device',
+      go_signup:'Sign up', go_login:'Log in',
+      admin_login_link:'Admin Login →', admin_panel_title:'Admin Panel Login',
+      admin_email:'Admin Email', back_to_user_login:'← Back to user login',
+      err_fill_all:'Please fill in all fields', err_valid_email:'Enter a valid email',
+      err_pw_len:'Password must be at least 4 characters', err_pw_match:'Passwords do not match',
+      err_email_exists:'An account with this email already exists, please log in',
+      err_login_fail:'Incorrect email or password', err_fill_email_pw:'Enter email and password',
+      err_admin_login_fail:'Incorrect admin email or password',
+      stat_today:'Today', stat_week:'This Week', stat_month:'This Month',
+      add_expense_btn:'+ Add New Expense',
+      search_placeholder:'🔍 Search by note, category or payment method...',
+      filter_all:'All',
+      empty_expenses:'No expenses added yet.<br/>Tap the button above to add your first one.',
+      section_month_breakdown:"This month's spending by category",
+      today_label:'Today', yesterday_label:'Yesterday',
+      footer_credit:'Developed by Imrul',
+      menu_total_expense:'💰 Total Expense', menu_theme:'🌓 Theme', menu_profile:'👤 Profile',
+      menu_change_pw:'🔑 Change Password', menu_budget:'🎯 Monthly Budget',
+      menu_chart:'📊 View Charts', menu_export_pdf:'📥 Export PDF',
+      menu_backup:'⬇️ Download Backup', menu_restore:'⬆️ Restore Backup',
+      menu_logout:'🚪 Logout', menu_language:'🌐 Language',
+      modal_add_expense:'New Expense', modal_edit_expense:'Edit Expense',
+      label_amount:'Amount (৳)', amount_placeholder:'e.g. 150', err_amount:'Enter an amount',
+      label_datetime:'Date & Time', label_category:'Category', label_payment:'Payment Method',
+      label_note:'Note', note_placeholder:'A short note (optional)', label_receipt:'Photo/Receipt',
+      upload_change:'Tap to change photo', upload_new:'Tap to upload a receipt photo',
+      btn_delete:'Delete', btn_update:'Update', btn_save:'Save',
+      confirm_delete_expense:'Are you sure you want to delete this expense?',
+      modal_change_pw:'Change Password', label_current_pw:'Current Password',
+      label_new_pw:'New Password', label_confirm_new_pw:'Confirm New Password',
+      btn_change:'Change Password', err_current_pw:'Current password is incorrect',
+      err_new_pw_match:'New passwords do not match', pw_changed:'Password changed successfully.',
+      modal_profile:'Profile', err_name_empty:'Name cannot be empty',
+      modal_budget:'Set Monthly Budget', label_budget_amount:'Budget per month (৳)',
+      budget_placeholder:'e.g. 15000', budget_hint:"You'll be warned on the dashboard once you cross 80% of your budget. Leave at 0 to disable.",
+      budget_label_dash:'Monthly Budget', budget_over:'⚠️ Budget exceeded! You spent',
+      budget_over_suffix:'more than planned', budget_warn:'⚠️',
+      budget_warn_suffix:'% of your budget is used',
+      modal_chart:'Charts & Insights', chart_last7:'Last 7 days', chart_month_cat:"This month's category split",
+      chart_no_data:'No expenses this month.',
+      modal_total:'Total Expense Details', total_alltime:'All-time Total', total_entries:'Total Entries',
+      total_avg_monthly:'Avg. Monthly Spend', total_top_month:'Highest spending month:',
+      total_trend6:'Last 6 months trend', total_by_month:'Month-by-month',
+      total_by_cat:'All-time spending by category', entries_suffix:' entries',
+      backup_confirm:' entries restored.', backup_invalid:'This is not a valid HisabGo backup file, or it could not be read.',
+      pdf_generating:'Generating PDF, please wait...', pdf_fail:'Could not generate PDF. Check your internet connection and try again.',
+      pdf_title:'HisabGo — Expense Report', pdf_generated:'Generated', pdf_total_line:'Total Spent:',
+      pdf_col_date:'Date', pdf_col_cat:'Category', pdf_col_pay:'Method', pdf_col_note:'Note', pdf_col_amt:'Amount',
+      pdf_no_data:'No expenses',
+      storage_save_fail:'Could not save your data. Please check your connection and try again.',
+      storage_too_large:'Your expense data (with receipt photos) has gotten quite large. Please remove some old receipt photos or download a backup.',
+      check_email_confirm:'Account created! Please check your email inbox to verify your account before logging in.',
+    },
+  };
+  function t(key){ const lang = STR[state.language] ? state.language : 'bn'; return (STR[lang] && STR[lang][key] !== undefined) ? STR[lang][key] : (STR.bn[key] || key); }
+  function monthFull(idx){ return state.language==='en' ? EN_MONTHS[idx] : BN_MONTHS[idx]; }
+  function monthShort(idx){ return state.language==='en' ? EN_MONTHS_SHORT[idx] : BN_MONTHS_SHORT[idx]; }
+  function paymentDisplay(val){ return state.language==='en' ? (PAY_EN[val] || val) : val; }
+
+  // ---- Supabase connection ----
+  const SUPABASE_URL = 'https://mplksyduaxbwqmpoqcne.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_dOqvBS5eWZylSj08yZ8yaw_Zv5qupBA';
+
+  // Supabase Auth needs to persist its session somewhere. Browser localStorage
+  // is not available in this environment, so we hand it a tiny adapter that
+  // rides on top of the artifact's own window.storage (personal/per-device).
+  const sbAuthStorage = {
+    getItem: async (key)=>{ try{ const r = await window.storage.get(key, false); return (r && r.value !== undefined) ? r.value : null; }catch(e){ return null; } },
+    setItem: async (key, value)=>{ try{ await window.storage.set(key, value, false); }catch(e){} },
+    removeItem: async (key)=>{ try{ await window.storage.delete(key, false); }catch(e){} },
+  };
+  let supabase = null;
+  async function ensureSupabase(){
+    if(supabase) return supabase;
+    if(!window.supabase){
+      await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js');
     }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storage: sbAuthStorage, persistSession:true, autoRefreshToken:true, detectSessionInUrl:false }
+    });
+    return supabase;
+  }
 
-    *{box-sizing:border-box;}
-    body{ margin:0; padding:0; }
+  function toBn(num){ if(state.language==='en') return String(num); return String(num).replace(/[0-9]/g, d => BN_DIGITS[d]); }
+  function fmtAmt(n){ return toBn(Math.round(n||0).toLocaleString('en-US')); }
+  function catInfo(id){ const c = CATEGORIES.find(c=>c.id===id) || CATEGORIES[CATEGORIES.length-1]; return { ...c, name: state.language==='en' ? c.en : c.bn }; }
+  function pad(n){ return n<10 ? '0'+n : ''+n; }
+  function toLocalInputValue(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
+  function dayKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function dayLabel(d){
+    const today = new Date(); const y = new Date(); y.setDate(today.getDate()-1);
+    if(dayKey(d)===dayKey(today)) return t('today_label');
+    if(dayKey(d)===dayKey(y)) return t('yesterday_label');
+    return toBn(d.getDate())+' '+monthFull(d.getMonth());
+  }
+  function uid(){ return 'u'+Date.now()+Math.random().toString(36).slice(2,8); }
+  function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+  function simpleHash(str){
+    let h = 5381;
+    for(let i=0;i<str.length;i++){ h = ((h*33) ^ str.charCodeAt(i)) >>> 0; }
+    return h.toString(16);
+  }
+  function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
-    @keyframes hkSpin{ to{ transform:rotate(360deg); } }
-    .hk-spinner{ display:inline-block; width:15px; height:15px; border:2px solid rgba(255,255,255,0.45); border-top-color:#fff; border-radius:50%; animation:hkSpin 0.55s linear infinite; vertical-align:middle; margin-right:7px; }
-    @keyframes hkFadeIn{ from{ opacity:0; transform:translateY(5px); } to{ opacity:1; transform:translateY(0); } }
-    .hk-fade-in{ animation:hkFadeIn 0.2s ease; }
-    button, .hk-chip, .hk-cat-opt, .hk-pay-opt, .hk-stat, .hk-menu-item, .hk-row, .ad-btn, .ad-user-top, .hk-tab, .hk-link{
-      transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+  let state = {
+    screen:'loading', // loading|login|signup|app|admin
+    authError:'',
+    users:[], // admin only: list of profiles fetched from Supabase
+    session:null, // {userId,name,email,isAdmin}
+    expenses:[],
+    filterCat:'all',
+    filterRange:'all',
+    editing:null,
+    adminSearch:'',
+    adminExpanded:null,
+    adminCache:{}, // userId -> {count, total, list}
+    theme:'paper', // 'paper' | 'dark'
+    budget:0,
+    searchQuery:'',
+    remembered:null,
+    language:'bn', // 'bn' | 'en'
+  };
+
+  async function storageGet(key, shared){
+    try{
+      const res = await window.storage.get(key, shared);
+      return res && res.value ? JSON.parse(res.value) : null;
+    }catch(e){ return null; }
+  }
+  async function storageSet(key, value, shared, attempt){
+    attempt = attempt || 1;
+    try{
+      const json = JSON.stringify(value);
+      await window.storage.set(key, json, shared);
+      return true;
+    }catch(e){
+      console.error('storage set failed', e);
+      if(attempt < 3){
+        await new Promise(r=>setTimeout(r, 400*attempt));
+        return storageSet(key, value, shared, attempt+1);
+      }
+      showToast(t('storage_save_fail'));
+      return false;
     }
-    .hk-add-btn:active, .hk-btn-save:active, .hk-btn-delete:active, .hk-chip:active, .hk-cat-opt:active, .hk-pay-opt:active, .hk-menu-item:active{ transform:scale(0.96); }
-    .hk-input, .hk-select, .hk-textarea, .hk-search-input{ transition: border-color 0.12s ease, box-shadow 0.12s ease; }
-    .hk-input:focus, .hk-textarea:focus, .hk-search-input:focus{ outline:none; border-color:var(--ledger-green); box-shadow:0 0 0 3px rgba(31,75,63,0.12); }
-    .hk-budget-fg{ transition: width 0.4s ease; }
+  }
 
-    body.theme-dark{
-      --paper:#121A20;
-      --paper-line:#26333d;
-      --ink:#EAF1F5;
-      --ink-soft:#93A6B3;
-      --card:#1B252D;
-      --ledger-green:#2F6A56;
-      --ledger-green-dark:#1c4437;
-    }
-    body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:0; padding:0; }
-    .hk-root{ max-width:640px; margin:0 auto; min-height:100vh; background:var(--paper); position:relative; }
-    .hk-brand{ font-family:'Poppins',sans-serif; font-weight:700; }
+  function showToast(msg){
+    let el = document.getElementById('hkToast');
+    if(el) el.remove();
+    el = document.createElement('div');
+    el.id = 'hkToast';
+    el.className = 'hk-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(()=>{ if(el.parentNode){ el.classList.add('hk-toast-out'); setTimeout(()=>el.remove(), 250); } }, 3800);
+  }
 
-    /* ---------- AUTH SCREENS ---------- */
-    .hk-auth-wrap{
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
-      background:
-        repeating-linear-gradient(var(--paper), var(--paper) 33px, var(--paper-line) 34px);
-      padding:30px 18px;
-    }
-    .hk-auth-card{
-      background:var(--card); border:1px solid var(--paper-line); border-radius:18px;
-      padding:28px 26px; width:100%; max-width:380px; box-shadow:0 10px 30px rgba(31,75,63,0.08);
-    }
-    .hk-auth-logo{ text-align:center; margin-bottom:4px; }
-    .hk-auth-logo .hk-brand{ font-size:26px; color:var(--ledger-green); }
-    .hk-auth-logo .em{ font-size:26px; margin-right:4px; }
-    .hk-auth-sub{ text-align:center; color:var(--ink-soft); font-size:13px; margin-bottom:20px; }
-    .hk-tabs{ display:flex; background:var(--paper); border-radius:11px; padding:4px; margin-bottom:20px; }
-    .hk-tab{ flex:1; text-align:center; padding:9px; border-radius:8px; font-size:13.5px; font-weight:600; cursor:pointer; color:var(--ink-soft); }
-    .hk-tab.active{ background:var(--ledger-green); color:#fff; }
-    .hk-field{ margin-bottom:14px; }
-    .hk-label{ display:block; font-size:12.5px; color:var(--ink-soft); margin-bottom:5px; font-weight:600; }
-    .hk-input,.hk-select,.hk-textarea{
-      width:100%; border:1px solid var(--paper-line); border-radius:9px; padding:10px 11px;
-      font-family:'Hind Siliguri',sans-serif; font-size:14.5px; background:#fff; color:var(--ink);
-    }
-    .hk-textarea{ resize:vertical; min-height:44px; }
-    .hk-btn-save{
-      width:100%; background:var(--ledger-green); color:#fff; border:none; border-radius:10px;
-      padding:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:'Hind Siliguri',sans-serif;
-    }
-    .hk-error{ color:var(--red); font-size:12.5px; margin-top:-6px; margin-bottom:10px; }
-    .hk-pw-wrap{ position:relative; }
-    .hk-pw-wrap .hk-input{ padding-right:40px; }
-    .hk-eye{ position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:16px; padding:6px; line-height:1; }
-    .hk-auth-foot{ text-align:center; margin-top:16px; font-size:12px; }
-    .hk-link{ color:var(--ledger-green); font-weight:700; cursor:pointer; text-decoration:underline; }
-    .hk-admin-link{ text-align:center; margin-top:14px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; }
-    .hk-lang-toggle{ font-size:11px; color:var(--ledger-green); font-weight:700; cursor:pointer; text-decoration:underline; }
+  async function fetchProfile(userId){
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    return error ? null : data;
+  }
+  async function hydrateSessionFromAuthUser(user){
+    const profile = await fetchProfile(user.id);
+    state.session = {
+      userId: user.id, email: user.email,
+      name: profile ? profile.name : user.email,
+      isAdmin: profile ? !!profile.is_admin : false,
+    };
+  }
+  async function loadExpensesForUser(userId){
+    const { data, error } = await supabase.from('expenses').select('*').eq('user_id', userId).order('datetime', { ascending:false });
+    if(error || !data) return [];
+    return data.map(r=>({ id:r.id, amount:Number(r.amount), datetime:r.datetime, category:r.category, payment:r.payment, note:r.note||'', receipt:r.receipt||null }));
+  }
+  async function insertExpense(record){
+    const { data, error } = await supabase.from('expenses').insert({
+      user_id: state.session.userId,
+      amount: record.amount,
+      datetime: new Date(record.datetime).toISOString(),
+      category: record.category,
+      payment: record.payment,
+      note: record.note,
+      receipt: record.receipt,
+    }).select().single();
+    if(error){ console.error(error); showToast(t('storage_save_fail')); return null; }
+    return { id:data.id, amount:Number(data.amount), datetime:data.datetime, category:data.category, payment:data.payment, note:data.note||'', receipt:data.receipt||null };
+  }
+  async function updateExpenseDb(id, record){
+    const { error } = await supabase.from('expenses').update({
+      amount: record.amount,
+      datetime: new Date(record.datetime).toISOString(),
+      category: record.category,
+      payment: record.payment,
+      note: record.note,
+      receipt: record.receipt,
+    }).eq('id', id);
+    if(error){ console.error(error); showToast(t('storage_save_fail')); return false; }
+    return true;
+  }
+  async function deleteExpenseDb(id){
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    if(error){ console.error(error); showToast(t('storage_save_fail')); return false; }
+    return true;
+  }
+  async function loadPrefsFromDb(userId){
+    const { data } = await supabase.from('prefs').select('*').eq('user_id', userId).single();
+    state.theme = (data && data.theme) || 'paper';
+    state.budget = (data && data.budget) || 0;
+    applyTheme();
+  }
+  async function savePrefsToDb(){
+    if(!state.session || !state.session.userId) return;
+    const { error } = await supabase.from('prefs').upsert({ user_id: state.session.userId, theme: state.theme, budget: state.budget });
+    if(error){ console.error(error); showToast(t('storage_save_fail')); }
+  }
+  function applyTheme(){ document.body.classList.toggle('theme-dark', state.theme==='dark'); }
 
-    /* ---------- APP HEADER ---------- */
-    .hk-spine{ display:none; }
-    .hk-header{ background:var(--ledger-green); color:var(--paper); padding:18px 24px 20px 24px; border-radius:0 0 18px 18px; position:relative; }
-    .hk-header-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
-    .hk-title{ font-size:24px; margin:0 0 2px 0; letter-spacing:0.3px; }
-    .hk-subtitle{ font-size:12.5px; color:#cfe0d8; margin:0; }
-    .hk-user-chip{ display:flex; align-items:center; gap:8px; }
-    .hk-user-name{ font-size:12.5px; color:#e7f0eb; font-weight:600; }
-    .hk-menu-wrap{ position:relative; }
-    .hk-menu-btn{ width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.14); border:none; color:#fff; font-size:17px; cursor:pointer; line-height:1; }
-    .hk-menu-btn:hover{ background:rgba(255,255,255,0.22); }
-    .hk-menu-panel{ position:absolute; top:calc(100% + 8px); right:0; min-width:215px; max-height:75vh; overflow-y:auto; background:var(--card); border:1px solid var(--paper-line); border-radius:12px; box-shadow:0 10px 26px rgba(0,0,0,0.18); padding:6px; z-index:60; }
-    .hk-menu-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 11px; border-radius:8px; font-size:13px; color:var(--ink); cursor:pointer; }
-    .hk-menu-item:hover{ background:var(--paper); }
-    .hk-menu-right{ font-size:11px; color:var(--ink-soft); }
-    .hk-menu-divider{ height:1px; background:var(--paper-line); margin:5px 4px; }
-    .hk-menu-danger{ color:var(--red); }
-    .hk-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .hk-stat{ background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:10px 8px; text-align:center; cursor:pointer; }
-    .hk-stat:hover{ background:rgba(255,255,255,0.16); }
-    .hk-stat.active{ background:var(--gold); border-color:var(--gold); }
-    .hk-stat.active .hk-stat-label,.hk-stat.active .hk-stat-amt{ color:var(--ledger-green-dark); }
-    .hk-stat-label{ font-size:11.5px; color:#d8e6df; margin-bottom:4px; }
-    .hk-stat-amt{ font-size:17px; font-weight:700; color:#fff; }
-    .hk-budget-bar-wrap{ margin-top:14px; }
-    .hk-budget-top{ display:flex; justify-content:space-between; font-size:11.5px; color:#d8e6df; margin-bottom:5px; }
-    .hk-budget-bg{ height:8px; background:rgba(255,255,255,0.18); border-radius:5px; overflow:hidden; }
-    .hk-budget-fg{ height:100%; background:var(--gold); border-radius:5px; }
-    .hk-budget-fg.warn{ background:#e2a33d; }
-    .hk-budget-fg.over{ background:var(--red-soft); }
-    .hk-budget-warn{ font-size:11px; color:#ffe1b3; margin-top:5px; }
-    .hk-search-input{ width:100%; border:1px solid var(--paper-line); border-radius:10px; padding:10px 12px; font-size:13.5px; margin-bottom:12px; background:var(--card); color:var(--ink); font-family:'Hind Siliguri',sans-serif; }
+  function loadScript(src){
+    return new Promise((resolve,reject)=>{
+      if(document.querySelector(`script[src="${src}"]`)){ resolve(); return; }
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve; s.onerror = ()=>reject(new Error('script load failed: '+src));
+      document.head.appendChild(s);
+    });
+  }
 
-    .hk-body{ padding:18px 20px 90px 20px; }
-    .hk-add-btn{
-      width:100%; background:var(--gold); color:var(--ledger-green-dark); border:none; border-radius:12px;
-      padding:13px; font-size:15.5px; font-weight:700; cursor:pointer; margin-bottom:18px; box-shadow:0 2px 0 #a97f2a;
-    }
-    .hk-add-btn:active{ transform:translateY(2px); box-shadow:none; }
-    .hk-filters{ display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:8px; }
-    .hk-chip{ flex:0 0 auto; background:var(--card); border:1px solid var(--paper-line); border-radius:20px; padding:6px 13px; font-size:13.5px; cursor:pointer; white-space:nowrap; color:var(--ink-soft); }
-    .hk-chip.active{ background:var(--ledger-green); border-color:var(--ledger-green); color:#fff; }
-    .hk-section-title{ font-family:'Tiro Bangla',serif; font-size:16px; color:var(--ledger-green); margin:22px 0 10px 0; padding-bottom:6px; border-bottom:1px dashed var(--paper-line); }
-    .hk-day-label{ font-size:12.5px; color:var(--ink-soft); margin:14px 0 6px 2px; font-weight:600; }
-    .hk-row{ background:var(--card); border:1px solid var(--paper-line); border-left:3px solid var(--ledger-green); border-radius:10px; padding:11px 12px; display:flex; align-items:center; gap:10px; margin-bottom:8px; cursor:pointer; }
-    .hk-row-icon{ font-size:20px; flex:0 0 auto; }
-    .hk-row-main{ flex:1; min-width:0; }
-    .hk-row-cat{ font-size:14.5px; font-weight:600; }
-    .hk-row-note{ font-size:12.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .hk-row-right{ text-align:right; flex:0 0 auto; }
-    .hk-row-amt{ font-size:15px; font-weight:700; color:var(--red); }
-    .hk-row-pay{ font-size:11px; color:var(--ink-soft); }
-    .hk-row-thumb{ width:34px;height:34px;border-radius:6px;object-fit:cover;flex:0 0 auto; border:1px solid var(--paper-line);}
-    .hk-empty{ text-align:center; color:var(--ink-soft); font-size:14px; padding:40px 10px; border:1px dashed var(--paper-line); border-radius:12px; background:var(--card); }
-    .hk-breakdown-row{ margin-bottom:10px; }
-    .hk-breakdown-top{ display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; }
-    .hk-breakdown-bar-bg{ height:8px; background:var(--paper-line); border-radius:5px; overflow:hidden; }
-    .hk-breakdown-bar-fg{ height:100%; background:var(--ledger-green); border-radius:5px; }
-    .hk-footer{ text-align:center; font-size:11.5px; color:var(--ink-soft); padding:18px 0 26px 0; }
-
-    /* Modal (add/edit expense) */
-    .hk-overlay{ position:fixed; inset:0; background:rgba(20,20,15,0.45); display:flex; align-items:flex-end; justify-content:center; z-index:50; animation:hkOverlayFade 0.15s ease; }
-    @keyframes hkOverlayFade{ from{ background:rgba(20,20,15,0); } to{ background:rgba(20,20,15,0.45); } }
-    .hk-modal{ background:repeating-linear-gradient(var(--card), var(--card) 33px, var(--paper-line) 34px); width:100%; max-width:640px; border-radius:20px 20px 0 0; padding:20px 20px 24px 20px; max-height:88vh; overflow-y:auto; animation:hkSlideUp 0.16s ease; }
-    @keyframes hkSlideUp{ from{ transform:translateY(18px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
-    .hk-modal-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-    .hk-modal-title{ font-family:'Tiro Bangla',serif; font-size:19px; color:var(--ledger-green); }
-    .hk-close{ background:none; border:none; font-size:20px; color:var(--ink-soft); cursor:pointer; padding:4px 8px; }
-    .hk-cat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-    .hk-cat-opt{ border:1.5px solid var(--paper-line); border-radius:11px; padding:9px 4px; text-align:center; font-size:11.5px; cursor:pointer; background:#fff; color:var(--ink-soft); }
-    .hk-cat-opt .em{ font-size:19px; display:block; margin-bottom:3px; }
-    .hk-cat-opt.active{ border-color:var(--ledger-green); background:#eaf2ee; color:var(--ledger-green); font-weight:700; }
-    .hk-pay-row{ display:flex; gap:8px; flex-wrap:wrap; }
-    .hk-pay-opt{ border:1.5px solid var(--paper-line); border-radius:20px; padding:7px 13px; font-size:13px; cursor:pointer; background:#fff; color:var(--ink-soft); }
-    .hk-pay-opt.active{ border-color:var(--gold); background:#fbf1dc; color:#8a6a1f; font-weight:700; }
-    .hk-upload-box{ border:1.5px dashed var(--paper-line); border-radius:11px; padding:14px; text-align:center; font-size:13px; color:var(--ink-soft); cursor:pointer; position:relative; }
-    .hk-upload-preview{ max-width:100%; max-height:130px; border-radius:8px; margin-top:8px; }
-    .hk-upload-box input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
-    .hk-modal-actions{ display:flex; gap:10px; margin-top:6px; }
-    .hk-btn-delete{ background:#fff; color:var(--red); border:1.5px solid var(--red-soft); border-radius:10px; padding:12px 16px; font-size:14px; font-weight:600; cursor:pointer; font-family:'Hind Siliguri',sans-serif; }
-    .hk-loading{ text-align:center; padding:60px 10px; color:var(--ink-soft); font-size:14px; }
-    .hk-pdf-loading{ position:fixed; inset:0; background:rgba(15,15,10,0.55); display:flex; align-items:center; justify-content:center; z-index:100; color:#fff; font-size:14px; text-align:center; padding:20px; }
-    .hk-toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:#2B2620; color:#fff; padding:12px 18px; border-radius:10px; font-size:13px; max-width:88%; text-align:center; z-index:200; box-shadow:0 8px 22px rgba(0,0,0,0.25); animation:hkToastIn 0.2s ease; }
-    .hk-toast-out{ animation:hkToastOut 0.25s ease forwards; }
-    @keyframes hkToastIn{ from{ opacity:0; transform:translateX(-50%) translateY(10px); } to{ opacity:1; transform:translateX(-50%) translateY(0); } }
-    @keyframes hkToastOut{ to{ opacity:0; transform:translateX(-50%) translateY(10px); } }
-    .hk-legend-row{ display:flex; align-items:center; gap:7px; font-size:12.5px; margin-bottom:7px; }
-    .hk-legend-dot{ width:10px; height:10px; border-radius:3px; flex:0 0 auto; }
-    .hk-legend-label{ flex:1; }
-    .hk-legend-pct{ font-weight:700; }
-
-    /* ---------- ADMIN PANEL (visually separate) ---------- */
-    .ad-root{ min-height:100vh; background:var(--admin-bg); color:var(--admin-text); font-family:'Hind Siliguri',sans-serif; }
-    .ad-wrap{ max-width:920px; margin:0 auto; padding:0 0 60px 0; }
-    .ad-header{ display:flex; justify-content:space-between; align-items:center; padding:20px 22px; border-bottom:1px solid var(--admin-line); }
-    .ad-brand{ font-size:19px; color:var(--admin-accent); }
-    .ad-brand .tag{ font-size:11px; color:var(--admin-muted); display:block; margin-top:2px; font-weight:400; }
-    .ad-logout{ font-size:12.5px; color:var(--admin-muted); border:1px solid var(--admin-line); padding:7px 13px; border-radius:8px; cursor:pointer; }
-    .ad-logout:hover{ color:var(--admin-text); border-color:var(--admin-accent); }
-    .ad-body{ padding:20px 22px; }
-    .ad-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px; }
-    .ad-stat{ background:var(--admin-panel); border:1px solid var(--admin-line); border-radius:12px; padding:14px; }
-    .ad-stat-label{ font-size:11.5px; color:var(--admin-muted); margin-bottom:6px; }
-    .ad-stat-val{ font-size:20px; font-weight:700; color:var(--admin-text); }
-    .ad-search{ width:100%; background:var(--admin-panel); border:1px solid var(--admin-line); border-radius:10px; padding:11px 14px; color:var(--admin-text); font-size:13.5px; margin-bottom:16px; font-family:'Hind Siliguri',sans-serif; }
-    .ad-search::placeholder{ color:var(--admin-muted); }
-    .ad-section-title{ font-size:14px; color:var(--admin-muted); margin:0 0 12px 0; text-transform:none; }
-    .ad-user-card{ background:var(--admin-panel); border:1px solid var(--admin-line); border-radius:12px; margin-bottom:10px; overflow:hidden; }
-    .ad-user-top{ display:flex; align-items:center; gap:12px; padding:14px; cursor:pointer; }
-    .ad-avatar{ width:38px; height:38px; border-radius:50%; background:var(--admin-accent); color:#0b1116; display:flex; align-items:center; justify-content:center; font-weight:700; flex:0 0 auto; }
-    .ad-user-info{ flex:1; min-width:0; }
-    .ad-user-name{ font-size:14.5px; font-weight:600; }
-    .ad-user-email{ font-size:12px; color:var(--admin-muted); }
-    .ad-user-meta{ text-align:right; font-size:12px; color:var(--admin-muted); flex:0 0 auto; }
-    .ad-user-meta .amt{ color:var(--admin-accent); font-weight:700; font-size:14px; display:block; }
-    .ad-user-actions{ display:flex; gap:8px; padding:0 14px 14px 14px; }
-    .ad-btn{ font-size:12px; border-radius:8px; padding:7px 12px; cursor:pointer; border:1px solid var(--admin-line); background:transparent; color:var(--admin-muted); font-family:'Hind Siliguri',sans-serif; }
-    .ad-btn:hover{ color:var(--admin-text); }
-    .ad-btn-danger{ color:var(--admin-danger); border-color:rgba(226,87,76,0.4); }
-    .ad-btn-danger:hover{ background:rgba(226,87,76,0.1); }
-    .ad-detail{ border-top:1px solid var(--admin-line); padding:14px; background:var(--admin-panel2); }
-    .ad-empty{ text-align:center; color:var(--admin-muted); padding:40px; border:1px dashed var(--admin-line); border-radius:12px; }
-    .ad-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--admin-line); font-size:13px; }
-    .ad-row:last-child{ border-bottom:none; }
-    .ad-row .cat{ color:var(--admin-text); }
-    .ad-row .amt{ color:var(--admin-accent); font-weight:600; }
-    .ad-foot{ text-align:center; font-size:11px; color:var(--admin-muted); padding:20px 0; }
-  </style>
-</head>
-<body>
-  <div id="hkApp"></div>
-
-  <!-- Supabase JS লাইব্রেরি -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    (function(){
-      // ---------- SUPABASE INIT ----------
-      const supabaseUrl = 'https://hwtatkiexydjzgaxltpi.supabase.co';
-      const supabaseKey = 'sb_publishable_zxoMyVHYFzhfbA5FYbdjrA_2dDnnr0H';
-      const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-      const CATEGORIES = [
-        {id:'food', em:'🍚', bn:'খাবার', en:'Food'},
-        {id:'transport', em:'🚌', bn:'যাতায়াত', en:'Transport'},
-        {id:'market', em:'🛒', bn:'বাজার', en:'Groceries'},
-        {id:'home', em:'🏠', bn:'বাসা', en:'Rent/Home'},
-        {id:'net', em:'📱', bn:'মোবাইল/ইন্টারনেট', en:'Mobile/Internet'},
-        {id:'edu', em:'🎓', bn:'পড়াশোনা', en:'Education'},
-        {id:'medical', em:'💊', bn:'চিকিৎসা', en:'Medical'},
-        {id:'fun', em:'🎮', bn:'বিনোদন', en:'Entertainment'},
-        {id:'fuel', em:'🏍️', bn:'বাইক ফুয়েল', en:'Bike Fuel'},
-        {id:'shopping', em:'🛍', bn:'Shopping', en:'Shopping'},
-        {id:'other', em:'📦', bn:'অন্যান্য', en:'Others'},
-      ];
-      const PAYMENTS = ['ক্যাশ','bKash','Nagad','Rocket','কার্ড','ব্যাংক ট্রান্সফার'];
-      const PAY_EN = {'ক্যাশ':'Cash','কার্ড':'Card','ব্যাংক ট্রান্সফার':'Bank Transfer'};
-      const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-      const BN_MONTHS = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
-      const BN_MONTHS_SHORT = ['জান','ফেব্র','মার্চ','এপ্রি','মে','জুন','জুলা','আগ','সেপ্ট','অক্ট','নভে','ডিসে'];
-      const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      const EN_MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-      // ---- Translation dictionary ----
-      const STR = {
-        bn: {
-          app_subtitle:'প্রতিদিনের খরচের হিসাব',
-          auth_subtitle:'প্রতিদিনের খরচের সহজ হিসাব',
-          tab_login:'লগইন', tab_signup:'সাইন আপ',
-          label_email:'ইমেইল', label_password:'পাসওয়ার্ড', label_name:'নাম',
-          label_confirm_password:'পাসওয়ার্ড আবার লিখুন',
-          login_btn:'লগইন করুন', signup_btn:'অ্যাকাউন্ট তৈরি করুন',
-          no_account:'অ্যাকাউন্ট নেই?', has_account:'অ্যাকাউন্ট আছে?',
-          remember_me:'এই ডিভাইসে মনে রাখুন',
-          go_signup:'সাইন আপ করুন', go_login:'লগইন করুন',
-          admin_login_link:'Admin Login →', admin_panel_title:'Admin Panel প্রবেশ',
-          admin_email:'Admin ইমেইল', back_to_user_login:'← ব্যবহারকারী লগইনে ফিরুন',
-          err_fill_all:'সব ঘর পূরণ করুন', err_valid_email:'সঠিক ইমেইল দিন',
-          err_pw_len:'পাসওয়ার্ড কমপক্ষে ৪ ক্যারেক্টার হতে হবে', err_pw_match:'পাসওয়ার্ড মিলছে না',
-          err_email_exists:'এই ইমেইল দিয়ে অ্যাকাউন্ট আছে, লগইন করুন',
-          err_login_fail:'ইমেইল অথবা পাসওয়ার্ড ভুল', err_fill_email_pw:'ইমেইল ও পাসওয়ার্ড দিন',
-          err_admin_login_fail:'Admin ইমেইল বা পাসওয়ার্ড ভুল',
-          stat_today:'আজ', stat_week:'এই সপ্তাহ', stat_month:'এই মাস',
-          add_expense_btn:'+ নতুন খরচ যোগ করুন',
-          search_placeholder:'🔍 নোট, ক্যাটাগরি বা পেমেন্ট মাধ্যম দিয়ে খুঁজুন...',
-          filter_all:'সব',
-          empty_expenses:'এখনো কোনো খরচ যোগ করা হয়নি।<br/>উপরের বাটনে চাপ দিয়ে প্রথম খরচটি লিখুন।',
-          section_month_breakdown:'এই মাসের খাত অনুযায়ী খরচ',
-          today_label:'আজ', yesterday_label:'গতকাল',
-          footer_credit:'Developed by Imrul',
-          menu_total_expense:'💰 মোট খরচ', menu_theme:'🌓 থিম', menu_profile:'👤 প্রোফাইল',
-          menu_change_pw:'🔑 পাসওয়ার্ড পরিবর্তন', menu_budget:'🎯 মাসিক বাজেট',
-          menu_chart:'📊 চার্ট দেখুন', menu_export_pdf:'📥 PDF এক্সপোর্ট',
-          menu_backup:'⬇️ ব্যাকআপ ডাউনলোড', menu_restore:'⬆️ ব্যাকআপ পুনরুদ্ধার',
-          menu_logout:'🚪 লগআউট', menu_language:'🌐 ভাষা',
-          modal_add_expense:'নতুন খরচ', modal_edit_expense:'খরচ সম্পাদনা',
-          label_amount:'Amount (৳)', amount_placeholder:'যেমন: ১৫০', err_amount:'টাকার পরিমাণ লিখুন',
-          label_datetime:'তারিখ ও সময়', label_category:'Category', label_payment:'Payment Method',
-          label_note:'Note', note_placeholder:'ছোট নোট (ঐচ্ছিক)', label_receipt:'ছবি/রসিদ',
-          upload_change:'ছবি পরিবর্তন করতে চাপ দিন', upload_new:'রসিদের ছবি আপলোড করতে চাপ দিন',
-          btn_delete:'মুছে ফেলুন', btn_update:'আপডেট করুন', btn_save:'সংরক্ষণ করুন',
-          confirm_delete_expense:'আপনি কি নিশ্চিত এই খরচটি মুছে ফেলতে চান?',
-          modal_change_pw:'পাসওয়ার্ড পরিবর্তন করুন', label_current_pw:'বর্তমান পাসওয়ার্ড',
-          label_new_pw:'নতুন পাসওয়ার্ড', label_confirm_new_pw:'নতুন পাসওয়ার্ড আবার লিখুন',
-          btn_change:'পরিবর্তন করুন', err_current_pw:'বর্তমান পাসওয়ার্ড ভুল',
-          err_new_pw_match:'নতুন পাসওয়ার্ড দুটো মিলছে না', pw_changed:'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে।',
-          modal_profile:'প্রোফাইল', err_name_empty:'নাম খালি রাখা যাবে না',
-          modal_budget:'মাসিক বাজেট নির্ধারণ', label_budget_amount:'প্রতি মাসের বাজেট (৳)',
-          budget_placeholder:'যেমন: ১৫০০০', budget_hint:'বাজেটের ৮০% পার হলে ড্যাশবোর্ডে সতর্ক করা হবে। ০ বা খালি রাখলে বাজেট বন্ধ থাকবে।',
-          budget_label_dash:'মাসিক বাজেট', budget_over:'⚠️ বাজেট শেষ! নির্ধারিত সীমার চেয়ে',
-          budget_over_suffix:'বেশি খরচ হয়েছে', budget_warn:'⚠️ বাজেটের',
-          budget_warn_suffix:'% ব্যবহার হয়ে গেছে',
-          modal_chart:'চার্ট ও বিশ্লেষণ', chart_last7:'গত ৭ দিনের খরচ', chart_month_cat:'এই মাসের ক্যাটাগরি বণ্টন',
-          chart_no_data:'এই মাসে কোনো খরচ নেই।',
-          modal_total:'মোট খরচের বিস্তারিত তথ্য', total_alltime:'সর্বমোট খরচ', total_entries:'মোট এন্ট্রি',
-          total_avg_monthly:'গড় মাসিক খরচ', total_top_month:'সর্বোচ্চ খরচের মাস:',
-          total_trend6:'গত ৬ মাসের প্রবণতা', total_by_month:'মাস অনুযায়ী হিসাব',
-          total_by_cat:'খাত অনুযায়ী সর্বমোট খরচ', entries_suffix:'টি এন্ট্রি',
-          backup_confirm:'টি এন্ট্রি পুনরুদ্ধার হয়েছে।', backup_invalid:'ফাইলটি সঠিক HisabGo ব্যাকআপ ফাইল নয় বা পড়া যায়নি।',
-          pdf_generating:'PDF তৈরি হচ্ছে, একটু অপেক্ষা করুন...', pdf_fail:'PDF তৈরি করা যায়নি। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।',
-          pdf_title:'HisabGo — খরচের রিপোর্ট', pdf_generated:'তৈরি হয়েছে', pdf_total_line:'মোট খরচ:',
-          pdf_col_date:'তারিখ', pdf_col_cat:'ক্যাটাগরি', pdf_col_pay:'মাধ্যম', pdf_col_note:'নোট', pdf_col_amt:'টাকা',
-          pdf_no_data:'কোনো খরচ নেই',
-          storage_save_fail:'ডেটা সংরক্ষণ করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।',
-          storage_too_large:'আপনার খরচের তালিকা (রশিদের ছবিসহ) অনেক বড় হয়ে গেছে। কিছু পুরনো রশিদের ছবি মুছে ফেলুন বা ব্যাকআপ ডাউনলোড করে রাখুন।',
-        },
-        en: {
-          app_subtitle:'Your daily expense ledger',
-          auth_subtitle:'Simple daily expense tracking',
-          tab_login:'Login', tab_signup:'Sign Up',
-          label_email:'Email', label_password:'Password', label_name:'Name',
-          label_confirm_password:'Confirm Password',
-          login_btn:'Log In', signup_btn:'Create Account',
-          no_account:"Don't have an account?", has_account:'Already have an account?',
-          remember_me:'Remember me on this device',
-          go_signup:'Sign up', go_login:'Log in',
-          admin_login_link:'Admin Login →', admin_panel_title:'Admin Panel Login',
-          admin_email:'Admin Email', back_to_user_login:'← Back to user login',
-          err_fill_all:'Please fill in all fields', err_valid_email:'Enter a valid email',
-          err_pw_len:'Password must be at least 4 characters', err_pw_match:'Passwords do not match',
-          err_email_exists:'An account with this email already exists, please log in',
-          err_login_fail:'Incorrect email or password', err_fill_email_pw:'Enter email and password',
-          err_admin_login_fail:'Incorrect admin email or password',
-          stat_today:'Today', stat_week:'This Week', stat_month:'This Month',
-          add_expense_btn:'+ Add New Expense',
-          search_placeholder:'🔍 Search by note, category or payment method...',
-          filter_all:'All',
-          empty_expenses:'No expenses added yet.<br/>Tap the button above to add your first one.',
-          section_month_breakdown:"This month's spending by category",
-          today_label:'Today', yesterday_label:'Yesterday',
-          footer_credit:'Developed by Imrul',
-          menu_total_expense:'💰 Total Expense', menu_theme:'🌓 Theme', menu_profile:'👤 Profile',
-          menu_change_pw:'🔑 Change Password', menu_budget:'🎯 Monthly Budget',
-          menu_chart:'📊 View Charts', menu_export_pdf:'📥 Export PDF',
-          menu_backup:'⬇️ Download Backup', menu_restore:'⬆️ Restore Backup',
-          menu_logout:'🚪 Logout', menu_language:'🌐 Language',
-          modal_add_expense:'New Expense', modal_edit_expense:'Edit Expense',
-          label_amount:'Amount (৳)', amount_placeholder:'e.g. 150', err_amount:'Enter an amount',
-          label_datetime:'Date & Time', label_category:'Category', label_payment:'Payment Method',
-          label_note:'Note', note_placeholder:'A short note (optional)', label_receipt:'Photo/Receipt',
-          upload_change:'Tap to change photo', upload_new:'Tap to upload a receipt photo',
-          btn_delete:'Delete', btn_update:'Update', btn_save:'Save',
-          confirm_delete_expense:'Are you sure you want to delete this expense?',
-          modal_change_pw:'Change Password', label_current_pw:'Current Password',
-          label_new_pw:'New Password', label_confirm_new_pw:'Confirm New Password',
-          btn_change:'Change Password', err_current_pw:'Current password is incorrect',
-          err_new_pw_match:'New passwords do not match', pw_changed:'Password changed successfully.',
-          modal_profile:'Profile', err_name_empty:'Name cannot be empty',
-          modal_budget:'Set Monthly Budget', label_budget_amount:'Budget per month (৳)',
-          budget_placeholder:'e.g. 15000', budget_hint:"You'll be warned on the dashboard once you cross 80% of your budget. Leave at 0 to disable.",
-          budget_label_dash:'Monthly Budget', budget_over:'⚠️ Budget exceeded! You spent',
-          budget_over_suffix:'more than planned', budget_warn:'⚠️',
-          budget_warn_suffix:'% of your budget is used',
-          modal_chart:'Charts & Insights', chart_last7:'Last 7 days', chart_month_cat:"This month's category split",
-          chart_no_data:'No expenses this month.',
-          modal_total:'Total Expense Details', total_alltime:'All-time Total', total_entries:'Total Entries',
-          total_avg_monthly:'Avg. Monthly Spend', total_top_month:'Highest spending month:',
-          total_trend6:'Last 6 months trend', total_by_month:'Month-by-month',
-          total_by_cat:'All-time spending by category', entries_suffix:' entries',
-          backup_confirm:' entries restored.', backup_invalid:'This is not a valid HisabGo backup file, or it could not be read.',
-          pdf_generating:'Generating PDF, please wait...', pdf_fail:'Could not generate PDF. Check your internet connection and try again.',
-          pdf_title:'HisabGo — Expense Report', pdf_generated:'Generated', pdf_total_line:'Total Spent:',
-          pdf_col_date:'Date', pdf_col_cat:'Category', pdf_col_pay:'Method', pdf_col_note:'Note', pdf_col_amt:'Amount',
-          pdf_no_data:'No expenses',
-          storage_save_fail:'Could not save your data. Please check your connection and try again.',
-          storage_too_large:'Your expense data (with receipt photos) has gotten quite large. Please remove some old receipt photos or download a backup.',
-        },
+  function wireEyeToggles(scope){
+    (scope || document).querySelectorAll('.hk-eye').forEach(btn=>{
+      btn.onclick = ()=>{
+        const inp = (scope || document).querySelector('#'+btn.getAttribute('data-target'));
+        if(!inp) return;
+        inp.type = inp.type==='password' ? 'text' : 'password';
+        btn.textContent = inp.type==='password' ? '👁' : '🙈';
       };
-      function t(key){ const lang = STR[state.language] ? state.language : 'bn'; return (STR[lang] && STR[lang][key] !== undefined) ? STR[lang][key] : (STR.bn[key] || key); }
-      function monthFull(idx){ return state.language==='en' ? EN_MONTHS[idx] : BN_MONTHS[idx]; }
-      function monthShort(idx){ return state.language==='en' ? EN_MONTHS_SHORT[idx] : BN_MONTHS_SHORT[idx]; }
-      function paymentDisplay(val){ return state.language==='en' ? (PAY_EN[val] || val) : val; }
+    });
+  }
 
-      // ---- Admin credentials ----
-      const ADMIN_EMAIL = 'admin@hisabgo.com';
-      const ADMIN_PASSWORD = 'Imrul@Admin123';
+  function setBtnLoading(btn, loading){
+    if(!btn) return;
+    if(loading){
+      if(!btn.dataset.origLabel) btn.dataset.origLabel = btn.innerHTML;
+      btn.innerHTML = `<span class="hk-spinner"></span>${btn.dataset.origLabel}`;
+      btn.disabled = true;
+      btn.style.opacity = '0.85';
+    } else {
+      if(btn.dataset.origLabel) btn.innerHTML = btn.dataset.origLabel;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  }
 
-      // ---------- SUPABASE DATA FUNCTIONS ----------
-      function mapUser(row){
-        return { id: row.id, email: row.email, name: row.name, passwordHash: row.password_hash, joinedAt: row.joined_at };
-      }
-      function toSupabaseUser(user){
-        return { id: user.id, email: user.email, name: user.name, password_hash: user.passwordHash, joined_at: user.joinedAt };
-      }
-      function mapExpense(row){
-        return { id: row.id, amount: Number(row.amount), datetime: row.datetime, category: row.category, payment: row.payment, note: row.note || '', receipt: row.receipt || null };
-      }
-      function toSupabaseExpense(exp, userId){
-        return { id: exp.id, user_id: userId, amount: exp.amount, datetime: exp.datetime, category: exp.category, payment: exp.payment, note: exp.note || '', receipt: exp.receipt };
-      }
+  const DEVICE_LANG_KEY = 'hisabgo:device_lang';
+  async function loadDeviceLang(){
+    const v = await storageGet(DEVICE_LANG_KEY, false);
+    if(v && v.language) state.language = v.language;
+  }
+  async function saveDeviceLang(){
+    await storageSet(DEVICE_LANG_KEY, { language: state.language }, false);
+  }
 
-      async function loadUsers(){
-        const { data, error } = await supabase.from('users').select('*');
-        if (error) { console.error('Error loading users:', error); return []; }
-        return data.map(mapUser);
-      }
-      async function saveUsers(users){
-        const { error } = await supabase.from('users').upsert(users.map(toSupabaseUser));
-        if (error) { console.error('Error saving users:', error); showToast(t('storage_save_fail')); return false; }
-        return true;
-      }
-      async function loadExpensesForUser(userId){
-        const { data, error } = await supabase.from('expenses').select('*').eq('user_id', userId).order('datetime', { ascending: false });
-        if (error) { console.error('Error loading expenses:', error); return []; }
-        return data.map(mapExpense);
-      }
-      async function saveExpensesForUser(userId, list){
-        try {
-          const { data: existingRows, error: selectError } = await supabase.from('expenses').select('id').eq('user_id', userId);
-          if (selectError) throw selectError;
-          const existingIds = new Set(existingRows.map(r => r.id));
-          const newIds = new Set(list.map(e => e.id));
-          const idsToDelete = [...existingIds].filter(id => !newIds.has(id));
-          if (idsToDelete.length > 0) {
-            const { error: deleteError } = await supabase.from('expenses').delete().in('id', idsToDelete);
-            if (deleteError) throw deleteError;
-          }
-          if (list.length > 0) {
-            const rows = list.map(exp => toSupabaseExpense(exp, userId));
-            const { error: upsertError } = await supabase.from('expenses').upsert(rows, { onConflict: 'id' });
-            if (upsertError) throw upsertError;
-          }
-          return true;
-        } catch (error) {
-          console.error('Error saving expenses:', error);
-          showToast(t('storage_save_fail'));
-          return false;
+  const REMEMBER_KEY = 'hisabgo:remembered_login';
+  async function loadRemembered(){
+    state.remembered = await storageGet(REMEMBER_KEY, false);
+  }
+  async function saveRemembered(email, password){
+    await storageSet(REMEMBER_KEY, { email, password }, false);
+    state.remembered = { email, password };
+  }
+  async function clearRemembered(){
+    try{ await window.storage.delete(REMEMBER_KEY, false); }catch(e){}
+    state.remembered = null;
+  }
+
+  async function init(){
+    await loadDeviceLang();
+    await loadRemembered();
+    try{
+      await ensureSupabase();
+      const { data:{ session } } = await supabase.auth.getSession();
+      if(session && session.user){
+        await hydrateSessionFromAuthUser(session.user);
+        if(state.session.isAdmin){
+          await loadAdminData();
+          state.screen = 'admin';
+        } else {
+          state.expenses = await loadExpensesForUser(state.session.userId);
+          await loadPrefsFromDb(state.session.userId);
+          state.screen = 'app';
         }
+      } else {
+        state.screen = 'login';
       }
-      async function loadPrefs(userId){
-        const { data, error } = await supabase.from('preferences').select('*').eq('user_id', userId).maybeSingle();
-        if (error) { console.error('Error loading prefs:', error); return; }
-        if (data) {
-          state.theme = data.theme || 'paper';
-          state.budget = Number(data.budget) || 0;
-          state.language = data.language || 'bn';
-          applyTheme();
-        }
-      }
-      async function savePrefs(){
-        if(!state.session || !state.session.userId) return;
-        const { error } = await supabase.from('preferences').upsert({
-          user_id: state.session.userId,
-          theme: state.theme,
-          budget: state.budget,
-          language: state.language
-        }, { onConflict: 'user_id' });
-        if (error) { console.error('Error saving prefs:', error); showToast(t('storage_save_fail')); }
-      }
+    }catch(e){
+      console.error(e);
+      state.screen = 'login';
+    }
+    render();
+  }
 
-      // Session & Remembered - localStorage
-      const SESSION_KEY = 'hisabgo:session';
-      const REMEMBER_KEY = 'hisabgo:remembered_login';
-      const DEVICE_LANG_KEY = 'hisabgo:device_lang';
+  function withinRange(d, range){
+    const now = new Date();
+    if(range==='today') return dayKey(d)===dayKey(now);
+    if(range==='week'){ const start=new Date(now); start.setDate(now.getDate()-6); start.setHours(0,0,0,0); return d>=start && d<=now; }
+    if(range==='month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+    return true;
+  }
+  function sumFor(list, range){
+    return list.filter(e=>withinRange(new Date(e.datetime), range)).reduce((s,e)=>s+Number(e.amount||0),0);
+  }
 
-      async function loadSession(){ return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
-      async function saveSession(){ localStorage.setItem(SESSION_KEY, JSON.stringify(state.session)); }
-      async function clearSession(){ localStorage.removeItem(SESSION_KEY); state.session = null; }
+  function render(){
+    const root = document.getElementById('hkApp');
+    if(state.screen==='login' || state.screen==='signup') root.innerHTML = renderAuth();
+    else if(state.screen==='app') root.innerHTML = renderApp();
+    else if(state.screen==='admin') root.innerHTML = renderAdminShell();
+    else root.innerHTML = `<div class="hk-loading">লোড হচ্ছে...</div>`;
+    attachHandlers();
+    if(state.screen==='admin') renderAdminBody();
+  }
 
-      async function loadRemembered(){ return JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null'); }
-      async function saveRemembered(email, password){ 
-        localStorage.setItem(REMEMBER_KEY, JSON.stringify({ email, password })); 
-        state.remembered = { email, password }; 
-      }
-      async function clearRemembered(){ localStorage.removeItem(REMEMBER_KEY); state.remembered = null; }
+  // ---------------- AUTH ----------------
+  function renderAuth(){
+    const isLogin = state.screen==='login';
+    return `
+    <div class="hk-auth-wrap hk-fade-in">
+      <div class="hk-auth-card">
+        <div style="text-align:right; margin-bottom:6px;"><span class="hk-lang-toggle" id="authLangToggle">${state.language==='bn' ? 'English' : 'বাংলা'}</span></div>
+        <div class="hk-auth-logo"><span class="em">📒</span><span class="hk-brand">HisabGo</span></div>
+        <div class="hk-auth-sub">${t('auth_subtitle')}</div>
+        <div class="hk-tabs">
+          <div class="hk-tab ${isLogin?'active':''}" id="tabLogin">${t('tab_login')}</div>
+          <div class="hk-tab ${!isLogin?'active':''}" id="tabSignup">${t('tab_signup')}</div>
+        </div>
+        ${isLogin ? `
+          <div class="hk-field"><label class="hk-label">${t('label_email')}</label><input class="hk-input" id="loginEmail" type="email" placeholder="you@example.com" value="${escapeHtml(state.remembered && state.remembered.email ? state.remembered.email : '')}"/></div>
+          <div class="hk-field"><label class="hk-label">${t('label_password')}</label>
+            <div class="hk-pw-wrap"><input class="hk-input" id="loginPass" type="password" placeholder="••••••••" value="${escapeHtml(state.remembered && state.remembered.password ? state.remembered.password : '')}"/><button type="button" class="hk-eye" data-target="loginPass">👁</button></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px; margin:-2px 0 14px 2px;">
+            <input type="checkbox" id="rememberMeChk" style="width:15px;height:15px;accent-color:var(--ledger-green);" checked/>
+            <label for="rememberMeChk" style="font-size:12px; color:var(--ink-soft); cursor:pointer;">${t('remember_me')}</label>
+          </div>
+          ${state.authError ? `<div class="hk-error">${state.authError}</div>` : ''}
+          <button class="hk-btn-save" id="loginBtn">${t('login_btn')}</button>
+          <div class="hk-auth-foot">${t('no_account')} <span class="hk-link" id="goSignup">${t('go_signup')}</span></div>
+        ` : `
+          <div class="hk-field"><label class="hk-label">${t('label_name')}</label><input class="hk-input" id="suName" type="text" placeholder="${state.language==='en'?'Your name':'আপনার নাম'}"/></div>
+          <div class="hk-field"><label class="hk-label">${t('label_email')}</label><input class="hk-input" id="suEmail" type="email" placeholder="you@example.com"/></div>
+          <div class="hk-field"><label class="hk-label">${t('label_password')}</label>
+            <div class="hk-pw-wrap"><input class="hk-input" id="suPass" type="password" placeholder="${state.language==='en'?'At least 4 characters':'কমপক্ষে ৪ ক্যারেক্টার'}"/><button type="button" class="hk-eye" data-target="suPass">👁</button></div>
+          </div>
+          <div class="hk-field"><label class="hk-label">${t('label_confirm_password')}</label>
+            <div class="hk-pw-wrap"><input class="hk-input" id="suPass2" type="password" placeholder="••••••••"/><button type="button" class="hk-eye" data-target="suPass2">👁</button></div>
+          </div>
+          ${state.authError ? `<div class="hk-error">${state.authError}</div>` : ''}
+          <button class="hk-btn-save" id="signupBtn">${t('signup_btn')}</button>
+          <div class="hk-auth-foot">${t('has_account')} <span class="hk-link" id="goLogin">${t('go_login')}</span></div>
+        `}
+      </div>
+    </div>`;
+  }
 
-      async function loadDeviceLang(){ 
-        const val = localStorage.getItem(DEVICE_LANG_KEY); 
-        if (val) { 
-          try { const obj = JSON.parse(val); if (obj && obj.language) state.language = obj.language; } catch(e) {} 
-        } 
-      }
-      async function saveDeviceLang(){ 
-        localStorage.setItem(DEVICE_LANG_KEY, JSON.stringify({ language: state.language })); 
-      }
+  // ---------------- USER APP (ledger) ----------------
+  function renderApp(){
+    const list = state.expenses;
+    const todaySum = sumFor(list,'today'), weekSum = sumFor(list,'week'), monthSum = sumFor(list,'month');
+    const allTimeTotal = list.reduce((s,e)=>s+Number(e.amount||0),0);
+    const budgetPct = state.budget>0 ? Math.min(999, Math.round((monthSum/state.budget)*100)) : 0;
+    const budgetClass = budgetPct>=100 ? 'over' : (budgetPct>=80 ? 'warn' : '');
+    const sq = (state.searchQuery||'').trim().toLowerCase();
+    const filtered = list
+      .filter(e=>state.filterCat==='all' || e.category===state.filterCat)
+      .filter(e=>withinRange(new Date(e.datetime), state.filterRange))
+      .filter(e=> !sq || (e.note||'').toLowerCase().includes(sq) || catInfo(e.category).name.toLowerCase().includes(sq) || (e.payment||'').toLowerCase().includes(sq))
+      .sort((a,b)=> new Date(b.datetime)-new Date(a.datetime));
 
-      // ---------- GLOBAL STATE ----------
-      let state = {
-        screen:'loading',
-        authError:'',
-        users:[],
-        session:null,
-        expenses:[],
-        filterCat:'all',
-        filterRange:'all',
-        editing:null,
-        adminSearch:'',
-        adminExpanded:null,
-        adminCache:{},
-        theme:'paper',
-        budget:0,
-        searchQuery:'',
-        remembered:null,
-        language:'bn',
+    const groups = []; let lastKey=null;
+    filtered.forEach(e=>{
+      const d = new Date(e.datetime); const k = dayKey(d);
+      if(k!==lastKey){ groups.push({key:k,date:d,items:[]}); lastKey=k; }
+      groups[groups.length-1].items.push(e);
+    });
+
+    const monthExpenses = list.filter(e=>withinRange(new Date(e.datetime),'month'));
+    const byCat = {};
+    monthExpenses.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + Number(e.amount||0); });
+    const maxCat = Math.max(1, ...Object.values(byCat));
+    const breakdownRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>{
+      const info = catInfo(cat); const pct = Math.round((amt/maxCat)*100);
+      return `<div class="hk-breakdown-row">
+        <div class="hk-breakdown-top"><span>${info.em} ${info.name}</span><span>৳${fmtAmt(amt)}</span></div>
+        <div class="hk-breakdown-bar-bg"><div class="hk-breakdown-bar-fg" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+
+    return `
+    <div class="hk-root hk-fade-in">
+      <div class="hk-spine"></div>
+      <div class="hk-header">
+        <div class="hk-header-top">
+          <div><div class="hk-title hk-brand">HisabGo</div><div class="hk-subtitle">${t('app_subtitle')}</div></div>
+          <div class="hk-user-chip">
+            <div class="hk-user-name">${escapeHtml(state.session.name)}</div>
+            <div class="hk-menu-wrap">
+              <button class="hk-menu-btn" id="hkMenuBtn">⋮</button>
+              <div class="hk-menu-panel" id="hkMenuPanel" style="display:none;">
+                <div class="hk-menu-item" id="menuTotalExpense">${t('menu_total_expense')} <span class="hk-menu-right">৳${fmtAmt(allTimeTotal)}</span></div>
+                <div class="hk-menu-item" id="menuThemeToggle">${t('menu_theme')} <span class="hk-menu-right" id="themeState">${state.theme==='dark'?'Dark':'Light'}</span></div>
+                <div class="hk-menu-item" id="menuLangToggle">🌐 ${state.language==='bn'?'English':'বাংলা'}</div>
+                <div class="hk-menu-item" id="menuProfile">${t('menu_profile')}</div>
+                <div class="hk-menu-item" id="menuChangePw">${t('menu_change_pw')}</div>
+                <div class="hk-menu-item" id="menuBudget">${t('menu_budget')} ${state.budget>0?`<span class="hk-menu-right">৳${fmtAmt(state.budget)}</span>`:''}</div>
+                <div class="hk-menu-item" id="menuChart">${t('menu_chart')}</div>
+                <div class="hk-menu-item" id="menuExportPdf">${t('menu_export_pdf')}</div>
+                <div class="hk-menu-item" id="menuBackup">${t('menu_backup')}</div>
+                <div class="hk-menu-item" id="menuRestore">${t('menu_restore')}</div>
+                <div class="hk-menu-divider"></div>
+                <div class="hk-menu-item hk-menu-danger" id="menuLogout">${t('menu_logout')}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hk-stats">
+          <div class="hk-stat ${state.filterRange==='today'?'active':''}" data-range="today"><div class="hk-stat-label">${t('stat_today')}</div><div class="hk-stat-amt">৳${fmtAmt(todaySum)}</div></div>
+          <div class="hk-stat ${state.filterRange==='week'?'active':''}" data-range="week"><div class="hk-stat-label">${t('stat_week')}</div><div class="hk-stat-amt">৳${fmtAmt(weekSum)}</div></div>
+          <div class="hk-stat ${state.filterRange==='month'?'active':''}" data-range="month"><div class="hk-stat-label">${t('stat_month')}</div><div class="hk-stat-amt">৳${fmtAmt(monthSum)}</div></div>
+        </div>
+        ${state.budget>0 ? `
+        <div class="hk-budget-bar-wrap">
+          <div class="hk-budget-top"><span>${t('budget_label_dash')}</span><span>৳${fmtAmt(monthSum)} / ৳${fmtAmt(state.budget)}</span></div>
+          <div class="hk-budget-bg"><div class="hk-budget-fg ${budgetClass}" style="width:${Math.min(100,budgetPct)}%"></div></div>
+          ${budgetPct>=100 ? `<div class="hk-budget-warn">${t('budget_over')} ৳${fmtAmt(monthSum-state.budget)} ${t('budget_over_suffix')}</div>` : budgetPct>=80 ? `<div class="hk-budget-warn">${t('budget_warn')} ${toBn(budgetPct)}${t('budget_warn_suffix')}</div>` : ''}
+        </div>` : ''}
+      </div>
+      <div class="hk-body">
+        <button class="hk-add-btn" id="hkAddBtn">${t('add_expense_btn')}</button>
+        <input class="hk-search-input" id="hkSearchInput" placeholder="${t('search_placeholder')}" value="${escapeHtml(state.searchQuery)}"/>
+        <div class="hk-filters" id="hkFilters">
+          <div class="hk-chip ${state.filterCat==='all'?'active':''}" data-cat="all">${t('filter_all')}</div>
+          ${CATEGORIES.map(c=>`<div class="hk-chip ${state.filterCat===c.id?'active':''}" data-cat="${c.id}">${c.em} ${state.language==='en'?c.en:c.bn}</div>`).join('')}
+        </div>
+        ${groups.length===0 ? `<div class="hk-empty">${t('empty_expenses')}</div>` :
+          groups.map(g=>`
+            <div class="hk-day-group">
+              <div class="hk-day-label">${dayLabel(g.date)}</div>
+              ${g.items.map(e=>{
+                const info = catInfo(e.category);
+                return `<div class="hk-row" data-id="${e.id}">
+                  ${e.receipt ? `<img class="hk-row-thumb" src="${e.receipt}"/>` : `<div class="hk-row-icon">${info.em}</div>`}
+                  <div class="hk-row-main"><div class="hk-row-cat">${info.name}</div>${e.note?`<div class="hk-row-note">${escapeHtml(e.note)}</div>`:''}</div>
+                  <div class="hk-row-right"><div class="hk-row-amt">-৳${fmtAmt(e.amount)}</div><div class="hk-row-pay">${paymentDisplay(e.payment)}</div></div>
+                </div>`;
+              }).join('')}
+            </div>`).join('')}
+        ${breakdownRows ? `<div class="hk-section-title">${t('section_month_breakdown')}</div>${breakdownRows}` : ''}
+        <div class="hk-footer">${t('footer_credit')}</div>
+      </div>
+    </div>`;
+  }
+
+  // ---------------- ADMIN PANEL ----------------
+  function renderAdminShell(){
+    return `
+    <div class="ad-root hk-fade-in">
+      <div class="ad-wrap">
+        <div class="ad-header">
+          <div class="ad-brand hk-brand">HisabGo <span class="tag">Admin Panel</span></div>
+          <div class="ad-logout" id="adminLogoutBtn">লগআউট</div>
+        </div>
+        <div class="ad-body" id="adminBody">
+          <div class="hk-loading" style="color:var(--admin-muted);">ডেটা লোড হচ্ছে...</div>
+        </div>
+        <div class="ad-foot">HisabGo Admin · Developed by Imrul</div>
+      </div>
+    </div>`;
+  }
+
+  async function loadAdminData(){
+    const { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending:false });
+    state.users = profiles || [];
+    const { data: allExpenses } = await supabase.from('expenses').select('*');
+    state.adminCache = {};
+    (allExpenses || []).forEach(e=>{
+      if(!state.adminCache[e.user_id]) state.adminCache[e.user_id] = { list:[], count:0, total:0 };
+      state.adminCache[e.user_id].list.push({ id:e.id, amount:Number(e.amount), datetime:e.datetime, category:e.category, payment:e.payment, note:e.note||'', receipt:e.receipt||null });
+      state.adminCache[e.user_id].count++;
+      state.adminCache[e.user_id].total += Number(e.amount || 0);
+    });
+  }
+
+  async function renderAdminBody(){
+    const body = document.getElementById('adminBody');
+    if(!body) return;
+
+    const totalUsers = state.users.length;
+    const totalTx = Object.values(state.adminCache).reduce((s,c)=>s+c.count,0);
+    const totalAmt = Object.values(state.adminCache).reduce((s,c)=>s+c.total,0);
+    const now = new Date(); const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7);
+    const newThisWeek = state.users.filter(u=>new Date(u.created_at) >= weekAgo).length;
+
+    const q = state.adminSearch.trim().toLowerCase();
+    const filteredUsers = state.users.filter(u =>
+      !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+    ).sort((a,b)=> new Date(b.created_at)-new Date(a.created_at));
+
+    body.innerHTML = `
+      <div class="ad-stats">
+        <div class="ad-stat"><div class="ad-stat-label">মোট ব্যবহারকারী</div><div class="ad-stat-val">${totalUsers}</div></div>
+        <div class="ad-stat"><div class="ad-stat-label">মোট এন্ট্রি</div><div class="ad-stat-val">${totalTx}</div></div>
+        <div class="ad-stat"><div class="ad-stat-label">মোট ট্র্যাক করা টাকা</div><div class="ad-stat-val">৳${fmtAmt(totalAmt)}</div></div>
+        <div class="ad-stat"><div class="ad-stat-label">এই সপ্তাহে নতুন</div><div class="ad-stat-val">${newThisWeek}</div></div>
+      </div>
+      <input class="ad-search" id="adminSearchInput" placeholder="নাম বা ইমেইল দিয়ে খুঁজুন..." value="${escapeHtml(state.adminSearch)}"/>
+      <div class="ad-section-title">ব্যবহারকারী তালিকা (${filteredUsers.length})</div>
+      ${filteredUsers.length===0 ? `<div class="ad-empty">কোনো ব্যবহারকারী পাওয়া যায়নি।</div>` :
+        filteredUsers.map(u=>{
+          const agg = state.adminCache[u.id] || {count:0,total:0,list:[]};
+          const expanded = state.adminExpanded === u.id;
+          const initial = (u.name||'?').trim().charAt(0).toUpperCase();
+          const joined = new Date(u.created_at);
+          return `
+          <div class="ad-user-card">
+            <div class="ad-user-top" data-uid="${u.id}">
+              <div class="ad-avatar">${initial}</div>
+              <div class="ad-user-info">
+                <div class="ad-user-name">${escapeHtml(u.name)}${u.is_admin ? ' 👑' : ''}</div>
+                <div class="ad-user-email">${escapeHtml(u.email)} · যোগ দিয়েছেন ${toBn(joined.getDate())} ${BN_MONTHS[joined.getMonth()]}</div>
+              </div>
+              <div class="ad-user-meta"><span class="amt">৳${fmtAmt(agg.total)}</span>${toBn(agg.count)}টি এন্ট্রি</div>
+            </div>
+            <div class="ad-user-actions">
+              <div class="ad-btn" data-view="${u.id}">${expanded ? 'বন্ধ করুন' : 'বিস্তারিত দেখুন'}</div>
+              ${u.id!==state.session.userId ? `<div class="ad-btn ad-btn-danger" data-deluser="${u.id}">ডেটা মুছুন</div>` : ''}
+            </div>
+            ${expanded ? `
+              <div class="ad-detail">
+                ${agg.list.length===0 ? `<div style="color:var(--admin-muted); font-size:13px;">কোনো এন্ট্রি নেই।</div>` :
+                  agg.list.slice().sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)).slice(0,25).map(e=>{
+                    const info = catInfo(e.category);
+                    const d = new Date(e.datetime);
+                    return `<div class="ad-row"><span class="cat">${info.em} ${info.name} · ${toBn(d.getDate())} ${BN_MONTHS[d.getMonth()]}</span><span class="amt">৳${fmtAmt(e.amount)}</span></div>`;
+                  }).join('')}
+                ${agg.list.length>25 ? `<div style="color:var(--admin-muted); font-size:12px; margin-top:8px;">আরও ${toBn(agg.list.length-25)}টি এন্ট্রি আছে...</div>` : ''}
+              </div>
+            ` : ''}
+          </div>`;
+        }).join('')}
+    `;
+
+    body.querySelectorAll('.ad-user-top').forEach(el=>{
+      el.onclick = ()=>{
+        const uidv = el.getAttribute('data-uid');
+        state.adminExpanded = state.adminExpanded===uidv ? null : uidv;
+        renderAdminBody();
       };
+    });
+    body.querySelectorAll('[data-view]').forEach(el=>{
+      el.onclick = (ev)=>{
+        ev.stopPropagation();
+        const uidv = el.getAttribute('data-view');
+        state.adminExpanded = state.adminExpanded===uidv ? null : uidv;
+        renderAdminBody();
+      };
+    });
+    body.querySelectorAll('[data-deluser]').forEach(el=>{
+      el.onclick = async (ev)=>{
+        ev.stopPropagation();
+        const uidv = el.getAttribute('data-deluser');
+        const u = state.users.find(x=>x.id===uidv);
+        if(!confirm(`"${u.name}" এর সব ডেটা মুছে ফেলতে চান? তার লগইন অ্যাকাউন্ট Supabase-এ থেকে যাবে, শুধু অ্যাপের ডেটা মুছে যাবে।`)) return;
+        await supabase.from('expenses').delete().eq('user_id', uidv);
+        await supabase.from('prefs').delete().eq('user_id', uidv);
+        await supabase.from('profiles').delete().eq('id', uidv);
+        state.users = state.users.filter(x=>x.id!==uidv);
+        delete state.adminCache[uidv];
+        if(state.adminExpanded===uidv) state.adminExpanded=null;
+        renderAdminBody();
+      };
+    });
+    const searchInput = document.getElementById('adminSearchInput');
+    if(searchInput){
+      searchInput.oninput = (e)=>{ state.adminSearch = e.target.value; renderAdminBody(); };
+      searchInput.focus();
+      searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
+    }
+  }
 
-      function showToast(msg){
-        let el = document.getElementById('hkToast');
-        if(el) el.remove();
-        el = document.createElement('div');
-        el.id = 'hkToast';
-        el.className = 'hk-toast';
-        el.textContent = msg;
-        document.body.appendChild(el);
-        setTimeout(()=>{ if(el.parentNode){ el.classList.add('hk-toast-out'); setTimeout(()=>el.remove(), 250); } }, 3800);
+  // ---------------- CHANGE PASSWORD MODAL ----------------
+  function openChangePasswordModal(){
+    const overlay = document.createElement('div');
+    overlay.className = 'hk-overlay'; overlay.id = 'hkPwOverlay';
+    overlay.innerHTML = `
+      <div class="hk-modal">
+        <div class="hk-modal-head"><div class="hk-modal-title">${t('modal_change_pw')}</div><button class="hk-close" id="hkPwClose">✕</button></div>
+        <div class="hk-field"><label class="hk-label">${t('label_current_pw')}</label>
+          <div class="hk-pw-wrap"><input class="hk-input" id="curPass" type="password"/><button type="button" class="hk-eye" data-target="curPass">👁</button></div>
+        </div>
+        <div class="hk-field"><label class="hk-label">${t('label_new_pw')}</label>
+          <div class="hk-pw-wrap"><input class="hk-input" id="newPass" type="password"/><button type="button" class="hk-eye" data-target="newPass">👁</button></div>
+        </div>
+        <div class="hk-field"><label class="hk-label">${t('label_confirm_new_pw')}</label>
+          <div class="hk-pw-wrap"><input class="hk-input" id="newPass2" type="password"/><button type="button" class="hk-eye" data-target="newPass2">👁</button></div>
+        </div>
+        <div class="hk-error" id="pwErr" style="display:none;"></div>
+        <div class="hk-modal-actions"><button class="hk-btn-save" id="pwSaveBtn">${t('btn_change')}</button></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#hkPwClose').onclick = ()=> overlay.remove();
+    overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+    wireEyeToggles(overlay);
+    overlay.querySelector('#pwSaveBtn').onclick = async ()=>{
+      const cur = overlay.querySelector('#curPass').value;
+      const n1 = overlay.querySelector('#newPass').value;
+      const n2 = overlay.querySelector('#newPass2').value;
+      const errEl = overlay.querySelector('#pwErr');
+      const saveBtn = overlay.querySelector('#pwSaveBtn');
+      errEl.style.display = 'none';
+      if(n1.length<4){ errEl.textContent=t('err_pw_len'); errEl.style.display='block'; return; }
+      if(n1!==n2){ errEl.textContent=t('err_new_pw_match'); errEl.style.display='block'; return; }
+      setBtnLoading(saveBtn, true);
+      const { error: verifyErr } = await supabase.auth.signInWithPassword({ email: state.session.email, password: cur });
+      if(verifyErr){ setBtnLoading(saveBtn, false); errEl.textContent=t('err_current_pw'); errEl.style.display='block'; return; }
+      const { error: updateErr } = await supabase.auth.updateUser({ password: n1 });
+      setBtnLoading(saveBtn, false);
+      if(updateErr){ errEl.textContent=updateErr.message; errEl.style.display='block'; return; }
+      if(state.remembered && state.remembered.email===state.session.email){ await saveRemembered(state.session.email, n1); }
+      overlay.remove();
+      alert(t('pw_changed'));
+    };
+  }
+
+  // ---------------- PROFILE MODAL ----------------
+  function openProfileModal(){
+    const overlay = document.createElement('div');
+    overlay.className = 'hk-overlay'; overlay.id = 'hkProfileOverlay';
+    overlay.innerHTML = `
+      <div class="hk-modal">
+        <div class="hk-modal-head"><div class="hk-modal-title">${t('modal_profile')}</div><button class="hk-close" id="hkProfileClose">✕</button></div>
+        <div class="hk-field"><label class="hk-label">${t('label_name')}</label><input class="hk-input" id="profName" value="${escapeHtml(state.session.name)}"/></div>
+        <div class="hk-field"><label class="hk-label">${t('label_email')}</label><input class="hk-input" value="${escapeHtml(state.session.email)}" disabled style="opacity:0.6;"/></div>
+        <div class="hk-error" id="profErr" style="display:none;"></div>
+        <div class="hk-modal-actions"><button class="hk-btn-save" id="profSaveBtn">${t('btn_save')}</button></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#hkProfileClose').onclick = ()=> overlay.remove();
+    overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+    overlay.querySelector('#profSaveBtn').onclick = async ()=>{
+      const newName = overlay.querySelector('#profName').value.trim();
+      const errEl = overlay.querySelector('#profErr');
+      if(!newName){ errEl.textContent=t('err_name_empty'); errEl.style.display='block'; return; }
+      const { error } = await supabase.from('profiles').update({ name:newName }).eq('id', state.session.userId);
+      if(error){ errEl.textContent=error.message; errEl.style.display='block'; return; }
+      state.session.name = newName;
+      overlay.remove();
+      render();
+    };
+  }
+
+  // ---------------- BUDGET MODAL ----------------
+  function openBudgetModal(){
+    const overlay = document.createElement('div');
+    overlay.className = 'hk-overlay'; overlay.id = 'hkBudgetOverlay';
+    overlay.innerHTML = `
+      <div class="hk-modal">
+        <div class="hk-modal-head"><div class="hk-modal-title">${t('modal_budget')}</div><button class="hk-close" id="hkBudgetClose">✕</button></div>
+        <div class="hk-field"><label class="hk-label">${t('label_budget_amount')}</label><input type="number" class="hk-input" id="budgetInput" value="${state.budget||''}" placeholder="${t('budget_placeholder')}"/></div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;">${t('budget_hint')}</div>
+        <div class="hk-modal-actions"><button class="hk-btn-save" id="budgetSaveBtn">${t('btn_save')}</button></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#hkBudgetClose').onclick = ()=> overlay.remove();
+    overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+    overlay.querySelector('#budgetSaveBtn').onclick = async ()=>{
+      const val = parseFloat(overlay.querySelector('#budgetInput').value) || 0;
+      state.budget = val;
+      await savePrefsToDb();
+      overlay.remove();
+      render();
+    };
+  }
+
+  // ---------------- BACKUP / RESTORE ----------------
+  function downloadBackup(){
+    const data = {
+      app: 'HisabGo', version: 1, exportedAt: new Date().toISOString(),
+      user: { name: state.session.name, email: state.session.email },
+      expenses: state.expenses,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'hisabgo-backup-'+dayKey(new Date())+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function triggerRestore(){
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'application/json';
+    input.onchange = async (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const incoming = Array.isArray(data.expenses) ? data.expenses : (Array.isArray(data) ? data : null);
+        if(!incoming) throw new Error('invalid backup file');
+        let added = 0;
+        for(const exp of incoming){
+          if(exp && exp.amount){
+            const inserted = await insertExpense({ amount:exp.amount, datetime: exp.datetime || new Date().toISOString(), category: exp.category || 'other', payment: exp.payment || 'ক্যাশ', note: exp.note || '', receipt: exp.receipt || null });
+            if(inserted){ state.expenses.push(inserted); added++; }
+          }
+        }
+        render();
+        alert(`${toBn(added)}${t('backup_confirm')}`);
+      }catch(err){
+        alert(t('backup_invalid'));
       }
-      function applyTheme(){ document.body.classList.toggle('theme-dark', state.theme==='dark'); }
+    };
+    input.click();
+  }
 
-      // ... (বাকি ফাংশনগুলো আপনার মূল কোড থেকে কপি করুন, কোনো পরিবর্তন ছাড়াই)
-      // তবে মনে রাখবেন: init() ফাংশনে loadUsers, loadSession ইত্যাদি নতুন Supabase ফাংশন ব্যবহার করবে।
+  // ---------------- TOTAL EXPENSE DETAIL MODAL ----------------
+  function openTotalDetailModal(){
+    const list = state.expenses;
+    const allTimeTotal = list.reduce((s,e)=>s+Number(e.amount||0),0);
+    const allTimeCount = list.length;
 
-      // নিচে মূল কোডের বাকি অংশ (render, renderAuth, renderApp, renderAdminShell, renderAdminBody, openModal, closeModal, ইত্যাদি) সম্পূর্ণ অক্ষত অবস্থায় বসবে।
-      // এখানে সংক্ষিপ্ততার জন্য আমি পুরো অংশ লিখছি না, কিন্তু আপনি আপনার মূল কোড থেকে পুরো ফাংশনগুলো কপি করে বসাতে পারেন।
-      // শুধু নিশ্চিত হোন যে কোনো window.storage কল আর নেই।
+    // group by year-month
+    const byMonth = {};
+    list.forEach(e=>{
+      const d = new Date(e.datetime);
+      const key = d.getFullYear()+'-'+pad(d.getMonth()+1);
+      if(!byMonth[key]) byMonth[key] = { year:d.getFullYear(), month:d.getMonth(), sum:0, count:0 };
+      byMonth[key].sum += Number(e.amount||0);
+      byMonth[key].count += 1;
+    });
+    const monthEntries = Object.values(byMonth).sort((a,b)=> (b.year-a.year) || (b.month-a.month));
+    const monthsWithData = monthEntries.length;
+    const avgMonthly = monthsWithData>0 ? allTimeTotal/monthsWithData : 0;
+    const topMonth = monthEntries.slice().sort((a,b)=>b.sum-a.sum)[0];
 
-      // শেষে init() কল করুন
-      init();
+    // last 6 months (including empty ones) for the trend chart, oldest to newest
+    const trendLabels = [], trendVals = [];
+    for(let i=5;i>=0;i--){
+      const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-i);
+      const key = d.getFullYear()+'-'+pad(d.getMonth()+1);
+      trendLabels.push(monthShort(d.getMonth()));
+      trendVals.push(byMonth[key] ? byMonth[key].sum : 0);
+    }
 
-    })();
-  </script>
-</body>
-</html>
+    // all-time category breakdown
+    const byCat = {};
+    list.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + Number(e.amount||0); });
+    const maxCat = Math.max(1, ...Object.values(byCat), 0);
+    const catRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>{
+      const info = catInfo(cat); const pct = Math.round((amt/maxCat)*100);
+      return `<div class="hk-breakdown-row">
+        <div class="hk-breakdown-top"><span>${info.em} ${info.name}</span><span>৳${fmtAmt(amt)}</span></div>
+        <div class="hk-breakdown-bar-bg"><div class="hk-breakdown-bar-fg" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'hk-overlay'; overlay.id = 'hkTotalOverlay';
+    overlay.innerHTML = `
+      <div class="hk-modal">
+        <div class="hk-modal-head"><div class="hk-modal-title">${t('modal_total')}</div><button class="hk-close" id="hkTotalClose">✕</button></div>
+
+        <div class="hk-stats" style="margin-bottom:6px;">
+          <div class="hk-stat" style="background:var(--ledger-green); cursor:default;"><div class="hk-stat-label">${t('total_alltime')}</div><div class="hk-stat-amt">৳${fmtAmt(allTimeTotal)}</div></div>
+          <div class="hk-stat" style="background:var(--ledger-green); cursor:default;"><div class="hk-stat-label">${t('total_entries')}</div><div class="hk-stat-amt">${toBn(allTimeCount)}</div></div>
+          <div class="hk-stat" style="background:var(--ledger-green); cursor:default;"><div class="hk-stat-label">${t('total_avg_monthly')}</div><div class="hk-stat-amt">৳${fmtAmt(avgMonthly)}</div></div>
+        </div>
+
+        ${topMonth ? `<div style="font-size:12.5px; color:var(--ink-soft); margin:10px 2px 0 2px;">${t('total_top_month')} <b style="color:var(--ink);">${monthFull(topMonth.month)} ${toBn(topMonth.year)}</b> — ৳${fmtAmt(topMonth.sum)}</div>` : ''}
+
+        <div class="hk-section-title">${t('total_trend6')}</div>
+        <div style="text-align:center; overflow-x:auto;">${buildBarChartSVG(trendLabels, trendVals)}</div>
+
+        <div class="hk-section-title">${t('total_by_month')}</div>
+        ${monthEntries.length===0 ? `<div class="hk-empty">${t('empty_expenses').replace('<br/>',' ')}</div>` :
+          monthEntries.map(m=>`
+            <div class="hk-row" style="cursor:default;">
+              <div class="hk-row-icon">📅</div>
+              <div class="hk-row-main"><div class="hk-row-cat">${monthFull(m.month)} ${toBn(m.year)}</div><div class="hk-row-note">${toBn(m.count)}${t('entries_suffix')}</div></div>
+              <div class="hk-row-right"><div class="hk-row-amt">৳${fmtAmt(m.sum)}</div></div>
+            </div>`).join('')}
+
+        ${catRows ? `<div class="hk-section-title">${t('total_by_cat')}</div>${catRows}` : ''}
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#hkTotalClose').onclick = ()=> overlay.remove();
+    overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  }
+
+  // ---------------- CHART MODAL ----------------
+  const CHART_PALETTE = ['#1F4B3F','#A83232','#C79A3D','#4a7c94','#8e5b9e','#c2703d','#4f8a5b','#a24d72','#527a3e','#7a5230','#5c6270'];
+
+  function buildDonutSVG(data){
+    const total = data.reduce((s,d)=>s+d.value,0) || 1;
+    const radius=58, cx=70, cy=70, sw=24;
+    const circumference = 2*Math.PI*radius;
+    let cumulative = 0, circles = '';
+    data.forEach(d=>{
+      const frac = d.value/total;
+      const dash = frac*circumference;
+      const gap = circumference-dash;
+      const rotation = (cumulative/total)*360 - 90;
+      circles += `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${d.color}" stroke-width="${sw}" stroke-dasharray="${dash} ${gap}" transform="rotate(${rotation} ${cx} ${cy})"/>`;
+      cumulative += d.value;
+    });
+    return `<svg viewBox="0 0 140 140" width="140" height="140">${circles}</svg>`;
+  }
+
+  function buildBarChartSVG(labels, values){
+    const max = Math.max(1, ...values);
+    const barW=28, gap=13, height=100;
+    const width = labels.length*(barW+gap)+gap;
+    let bars = '';
+    values.forEach((v,i)=>{
+      const h = Math.max(2, Math.round((v/max)*height));
+      const x = gap + i*(barW+gap);
+      const y = height - h;
+      bars += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="4" fill="var(--ledger-green)"/>`;
+      bars += `<text x="${x+barW/2}" y="${height+16}" font-size="10" text-anchor="middle" fill="var(--ink-soft)">${labels[i]}</text>`;
+    });
+    return `<svg viewBox="0 0 ${width} ${height+22}" width="100%" height="130" style="max-width:${width}px;">${bars}</svg>`;
+  }
+
+  function openChartModal(){
+    const monthExpenses = state.expenses.filter(e=>withinRange(new Date(e.datetime),'month'));
+    const byCat = {};
+    monthExpenses.forEach(e=>{ byCat[e.category] = (byCat[e.category]||0) + Number(e.amount||0); });
+    const monthTotal = monthExpenses.reduce((s,e)=>s+Number(e.amount||0),0);
+    const donutData = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,val])=>{
+      const idx = CATEGORIES.findIndex(c=>c.id===cat);
+      return { label: catInfo(cat).name, em: catInfo(cat).em, value: val, color: CHART_PALETTE[idx % CHART_PALETTE.length] };
+    });
+
+    const days=[], vals=[];
+    for(let i=6;i>=0;i--){
+      const d = new Date(); d.setDate(d.getDate()-i);
+      const key = dayKey(d);
+      const sum = state.expenses.filter(e=>dayKey(new Date(e.datetime))===key).reduce((s,e)=>s+Number(e.amount||0),0);
+      days.push(toBn(d.getDate())); vals.push(sum);
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'hk-overlay'; overlay.id = 'hkChartOverlay';
+    overlay.innerHTML = `
+      <div class="hk-modal">
+        <div class="hk-modal-head"><div class="hk-modal-title">${t('modal_chart')}</div><button class="hk-close" id="hkChartClose">✕</button></div>
+        <div class="hk-section-title" style="margin-top:0;">${t('chart_last7')}</div>
+        <div style="text-align:center; overflow-x:auto;">${buildBarChartSVG(days, vals)}</div>
+        <div class="hk-section-title">${t('chart_month_cat')}</div>
+        ${donutData.length===0 ? `<div class="hk-empty">${t('chart_no_data')}</div>` : `
+        <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:center;">
+          <div>${buildDonutSVG(donutData)}</div>
+          <div style="flex:1; min-width:150px;">
+            ${donutData.map(d=>{
+              const pct = Math.round((d.value/(monthTotal||1))*100);
+              return `<div class="hk-legend-row"><span class="hk-legend-dot" style="background:${d.color};"></span><span class="hk-legend-label">${d.em} ${d.label}</span><span class="hk-legend-pct">${toBn(pct)}%</span></div>`;
+            }).join('')}
+          </div>
+        </div>`}
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#hkChartClose').onclick = ()=> overlay.remove();
+    overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  }
+
+  // ---------------- PDF EXPORT ----------------
+  async function exportPDF(){
+    const loadingEl = document.createElement('div');
+    loadingEl.className = 'hk-pdf-loading';
+    loadingEl.innerHTML = `<div style="text-align:center;"><div class="hk-spinner" style="width:26px;height:26px;border-width:3px;margin:0 auto 10px auto;"></div>${t('pdf_generating')}</div>`;
+    document.body.appendChild(loadingEl);
+    try{
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+
+      const sorted = state.expenses.slice().sort((a,b)=> new Date(b.datetime)-new Date(a.datetime));
+      const total = sorted.reduce((s,e)=>s+Number(e.amount||0),0);
+
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed; left:-9999px; top:0; width:700px; background:#fff; padding:28px; font-family:\'Hind Siliguri\',sans-serif; color:#2B2620;';
+      container.innerHTML = `
+        <div style="font-size:22px; font-weight:700; color:#1F4B3F; margin-bottom:2px;">${t('pdf_title')}</div>
+        <div style="font-size:12.5px; color:#6b6255; margin-bottom:18px;">${escapeHtml(state.session.name)} · ${t('pdf_generated')} ${new Date().toLocaleDateString(state.language==='en'?'en-US':'bn-BD')}</div>
+        <div style="font-size:14px; font-weight:700; margin-bottom:14px;">${t('pdf_total_line')} ৳${fmtAmt(total)} (${toBn(sorted.length)}${t('entries_suffix')})</div>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead><tr style="background:#1F4B3F; color:#fff;">
+            <th style="padding:8px; text-align:left;">${t('pdf_col_date')}</th>
+            <th style="padding:8px; text-align:left;">${t('pdf_col_cat')}</th>
+            <th style="padding:8px; text-align:left;">${t('pdf_col_pay')}</th>
+            <th style="padding:8px; text-align:left;">${t('pdf_col_note')}</th>
+            <th style="padding:8px; text-align:right;">${t('pdf_col_amt')}</th>
+          </tr></thead>
+          <tbody>
+            ${sorted.length===0 ? `<tr><td colspan="5" style="padding:14px; text-align:center; color:#6b6255;">${t('pdf_no_data')}</td></tr>` :
+              sorted.map((e,i)=>{
+                const d = new Date(e.datetime);
+                const info = catInfo(e.category);
+                return `<tr style="background:${i%2===0?'#F7F1E4':'#ffffff'};">
+                  <td style="padding:7px 8px; border-bottom:1px solid #E3D9C3;">${toBn(d.getDate())} ${monthFull(d.getMonth())} ${toBn(d.getFullYear())}</td>
+                  <td style="padding:7px 8px; border-bottom:1px solid #E3D9C3;">${info.em} ${info.name}</td>
+                  <td style="padding:7px 8px; border-bottom:1px solid #E3D9C3;">${paymentDisplay(e.payment)}</td>
+                  <td style="padding:7px 8px; border-bottom:1px solid #E3D9C3;">${escapeHtml(e.note||'-')}</td>
+                  <td style="padding:7px 8px; border-bottom:1px solid #E3D9C3; text-align:right; color:#A83232; font-weight:700;">৳${fmtAmt(e.amount)}</td>
+                </tr>`;
+              }).join('')}
+          </tbody>
+        </table>
+      `;
+      document.body.appendChild(container);
+
+      const canvas = await html2canvas(container, { scale:2, backgroundColor:'#ffffff' });
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p','pt','a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData,'PNG',0,position,imgWidth,imgHeight);
+      heightLeft -= pageHeight;
+      while(heightLeft > 0){
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData,'PNG',0,position,imgWidth,imgHeight);
+        heightLeft -= pageHeight;
+      }
+      pdf.save('HisabGo-report.pdf');
+    }catch(err){
+      console.error(err);
+      alert(t('pdf_fail'));
+    }finally{
+      if(loadingEl.parentNode) document.body.removeChild(loadingEl);
+    }
+  }
+
+  // ---------------- EXPENSE MODAL ----------------
+  function openModal(exp){
+    const isEdit = !!exp.id;
+    state.editing = {
+      id: exp.id || null,
+      amount: exp.amount || '',
+      datetime: exp.datetime ? toLocalInputValue(new Date(exp.datetime)) : toLocalInputValue(new Date()),
+      category: exp.category || CATEGORIES[0].id,
+      payment: exp.payment || PAYMENTS[0],
+      note: exp.note || '',
+      receipt: exp.receipt || null,
+    };
+    const overlay = document.createElement('div');
+    overlay.className = 'hk-overlay';
+    overlay.id = 'hkOverlay';
+    overlay.innerHTML = `
+      <div class="hk-modal">
+        <div class="hk-modal-head">
+          <div class="hk-modal-title">${isEdit ? t('modal_edit_expense') : t('modal_add_expense')}</div>
+          <button class="hk-close" id="hkModalClose">✕</button>
+        </div>
+        <div class="hk-field"><label class="hk-label">${t('label_amount')}</label>
+          <input type="number" inputmode="decimal" class="hk-input" id="hkAmount" placeholder="${t('amount_placeholder')}" value="${state.editing.amount}"/>
+          <div class="hk-error" id="hkAmountErr" style="display:none;">${t('err_amount')}</div>
+        </div>
+        <div class="hk-field"><label class="hk-label">${t('label_datetime')}</label><input type="datetime-local" class="hk-input" id="hkDatetime" value="${state.editing.datetime}"/></div>
+        <div class="hk-field"><label class="hk-label">${t('label_category')}</label>
+          <div class="hk-cat-grid" id="hkCatGrid">${CATEGORIES.map(c=>`<div class="hk-cat-opt ${state.editing.category===c.id?'active':''}" data-cat="${c.id}"><span class="em">${c.em}</span>${state.language==='en'?c.en:c.bn}</div>`).join('')}</div>
+        </div>
+        <div class="hk-field"><label class="hk-label">${t('label_payment')}</label>
+          <div class="hk-pay-row" id="hkPayRow">${PAYMENTS.map(p=>`<div class="hk-pay-opt ${state.editing.payment===p?'active':''}" data-pay="${p}">${paymentDisplay(p)}</div>`).join('')}</div>
+        </div>
+        <div class="hk-field"><label class="hk-label">${t('label_note')}</label><textarea class="hk-textarea" id="hkNote" placeholder="${t('note_placeholder')}">${escapeHtml(state.editing.note)}</textarea></div>
+        <div class="hk-field"><label class="hk-label">${t('label_receipt')}</label>
+          <div class="hk-upload-box" id="hkUploadBox">
+            <span id="hkUploadText">${state.editing.receipt ? t('upload_change') : t('upload_new')}</span>
+            <img class="hk-upload-preview" id="hkPreviewImg" src="${state.editing.receipt||''}" style="${state.editing.receipt?'':'display:none;'}"/>
+            <input type="file" accept="image/*" id="hkFileInput"/>
+          </div>
+        </div>
+        <div class="hk-modal-actions">
+          ${isEdit ? `<button class="hk-btn-delete" id="hkDeleteBtn">${t('btn_delete')}</button>` : ''}
+          <button class="hk-btn-save" id="hkSaveBtn">${isEdit ? t('btn_update') : t('btn_save')}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#hkModalClose').onclick = closeModal;
+    overlay.onclick = (e)=>{ if(e.target===overlay) closeModal(); };
+    overlay.querySelectorAll('#hkCatGrid .hk-cat-opt').forEach(el=>{
+      el.onclick = ()=>{ overlay.querySelectorAll('#hkCatGrid .hk-cat-opt').forEach(o=>o.classList.remove('active')); el.classList.add('active'); state.editing.category = el.getAttribute('data-cat'); };
+    });
+    overlay.querySelectorAll('#hkPayRow .hk-pay-opt').forEach(el=>{
+      el.onclick = ()=>{ overlay.querySelectorAll('#hkPayRow .hk-pay-opt').forEach(o=>o.classList.remove('active')); el.classList.add('active'); state.editing.payment = el.getAttribute('data-pay'); };
+    });
+    overlay.querySelector('#hkFileInput').onchange = (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        const img = new Image();
+        img.onload = ()=>{
+          const canvas = document.createElement('canvas'); const maxDim = 480;
+          let w=img.width,h=img.height;
+          if(w>h && w>maxDim){ h=h*(maxDim/w); w=maxDim; } else if(h>maxDim){ w=w*(maxDim/h); h=maxDim; }
+          canvas.width=w; canvas.height=h;
+          canvas.getContext('2d').drawImage(img,0,0,w,h);
+          const dataUrl = canvas.toDataURL('image/jpeg',0.5);
+          state.editing.receipt = dataUrl;
+          const preview = overlay.querySelector('#hkPreviewImg');
+          preview.src = dataUrl; preview.style.display='block';
+          overlay.querySelector('#hkUploadText').textContent = 'ছবি পরিবর্তন করতে চাপ দিন';
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    overlay.querySelector('#hkSaveBtn').onclick = async ()=>{
+      const amountVal = parseFloat(overlay.querySelector('#hkAmount').value);
+      if(!amountVal || amountVal<=0){ overlay.querySelector('#hkAmountErr').style.display='block'; return; }
+      const dtVal = overlay.querySelector('#hkDatetime').value || toLocalInputValue(new Date());
+      const noteVal = overlay.querySelector('#hkNote').value.trim();
+      const saveBtn = overlay.querySelector('#hkSaveBtn');
+      const record = { id: state.editing.id, amount:amountVal, datetime:dtVal, category:state.editing.category, payment:state.editing.payment, note:noteVal, receipt:state.editing.receipt };
+      setBtnLoading(saveBtn, true);
+      if(isEdit){
+        const ok = await updateExpenseDb(record.id, record);
+        setBtnLoading(saveBtn, false);
+        if(!ok) return;
+        const idx = state.expenses.findIndex(x=>x.id===record.id);
+        if(idx>-1) state.expenses[idx] = record;
+      } else {
+        const inserted = await insertExpense(record);
+        setBtnLoading(saveBtn, false);
+        if(!inserted) return;
+        state.expenses.push(inserted);
+      }
+      closeModal(); render();
+    };
+    if(isEdit){
+      overlay.querySelector('#hkDeleteBtn').onclick = async ()=>{
+        if(!confirm(t('confirm_delete_expense'))) return;
+        const ok = await deleteExpenseDb(exp.id);
+        if(!ok) return;
+        state.expenses = state.expenses.filter(x=>x.id!==exp.id);
+        closeModal(); render();
+      };
+    }
+  }
+  function closeModal(){ const o=document.getElementById('hkOverlay'); if(o) o.remove(); state.editing=null; }
+
+  // ---------------- EVENT WIRING ----------------
+  function attachHandlers(){
+    // auth tabs
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+    if(tabLogin) tabLogin.onclick = ()=>{ state.screen='login'; state.authError=''; render(); };
+    if(tabSignup) tabSignup.onclick = ()=>{ state.screen='signup'; state.authError=''; render(); };
+    const goLogin = document.getElementById('goLogin'); if(goLogin) goLogin.onclick = ()=>{ state.screen='login'; state.authError=''; render(); };
+    const goSignup = document.getElementById('goSignup'); if(goSignup) goSignup.onclick = ()=>{ state.screen='signup'; state.authError=''; render(); };
+    const goAdmin = document.getElementById('goAdmin'); if(goAdmin) goAdmin.onclick = ()=>{ state.screen='adminlogin'; state.authError=''; render(); };
+    const authLangToggle = document.getElementById('authLangToggle');
+    if(authLangToggle) authLangToggle.onclick = async ()=>{ state.language = state.language==='bn' ? 'en' : 'bn'; await saveDeviceLang(); render(); };
+
+    // login
+    const loginBtn = document.getElementById('loginBtn');
+    if(loginBtn) loginBtn.onclick = async ()=>{
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value;
+      const rememberChk = document.getElementById('rememberMeChk');
+      if(!email || !pass){ state.authError = t('err_fill_email_pw'); render(); return; }
+      setBtnLoading(loginBtn, true);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if(error || !data.user){ setBtnLoading(loginBtn, false); state.authError = t('err_login_fail'); render(); return; }
+      if(rememberChk && rememberChk.checked){ await saveRemembered(email, pass); } else { await clearRemembered(); }
+      await hydrateSessionFromAuthUser(data.user);
+      if(state.session.isAdmin){
+        await loadAdminData();
+        state.authError=''; state.screen='admin'; render();
+        return;
+      }
+      state.expenses = await loadExpensesForUser(state.session.userId);
+      await loadPrefsFromDb(state.session.userId);
+      state.authError=''; state.screen='app'; render();
+    };
+
+    // signup
+    const signupBtn = document.getElementById('signupBtn');
+    if(signupBtn) signupBtn.onclick = async ()=>{
+      const name = document.getElementById('suName').value.trim();
+      const email = document.getElementById('suEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('suPass').value;
+      const pass2 = document.getElementById('suPass2').value;
+      if(!name || !email || !pass){ state.authError=t('err_fill_all'); render(); return; }
+      if(!validEmail(email)){ state.authError=t('err_valid_email'); render(); return; }
+      if(pass.length<4){ state.authError=t('err_pw_len'); render(); return; }
+      if(pass!==pass2){ state.authError=t('err_pw_match'); render(); return; }
+      setBtnLoading(signupBtn, true);
+      const { data, error } = await supabase.auth.signUp({ email, password: pass, options:{ data:{ name } } });
+      setBtnLoading(signupBtn, false);
+      if(error){ state.authError = error.message.includes('already') ? t('err_email_exists') : error.message; render(); return; }
+      if(!data.session){
+        // Email confirmation is required by the Supabase project settings
+        state.authError = t('check_email_confirm'); state.screen='login'; render(); return;
+      }
+      await saveRemembered(email, pass);
+      await hydrateSessionFromAuthUser(data.user);
+      state.expenses = [];
+      state.theme = 'paper'; applyTheme();
+      state.authError=''; state.screen='app'; render();
+    };
+
+    // app
+    const addBtn = document.getElementById('hkAddBtn'); if(addBtn) addBtn.onclick = ()=> openModal({});
+    const menuBtn = document.getElementById('hkMenuBtn');
+    const menuPanel = document.getElementById('hkMenuPanel');
+    if(menuBtn && menuPanel){
+      menuBtn.onclick = (e)=>{ e.stopPropagation(); menuPanel.style.display = menuPanel.style.display==='none' ? 'block' : 'none'; };
+      document.addEventListener('click', (e)=>{
+        if(menuPanel.style.display!=='none' && !menuPanel.contains(e.target) && e.target!==menuBtn){ menuPanel.style.display='none'; }
+      });
+    }
+    const menuTotalExpense = document.getElementById('menuTotalExpense');
+    if(menuTotalExpense) menuTotalExpense.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; openTotalDetailModal(); };
+    const menuThemeToggle = document.getElementById('menuThemeToggle');
+    if(menuThemeToggle) menuThemeToggle.onclick = async ()=>{
+      state.theme = state.theme==='paper' ? 'dark' : 'paper';
+      applyTheme();
+      await savePrefsToDb();
+      const label = document.getElementById('themeState');
+      if(label) label.textContent = state.theme==='dark' ? 'Dark' : 'Light';
+    };
+    const menuLangToggle = document.getElementById('menuLangToggle');
+    if(menuLangToggle) menuLangToggle.onclick = async ()=>{
+      if(menuPanel) menuPanel.style.display='none';
+      state.language = state.language==='bn' ? 'en' : 'bn';
+      await savePrefsToDb();
+      await saveDeviceLang();
+      render();
+    };
+    const menuChangePw = document.getElementById('menuChangePw');
+    if(menuChangePw) menuChangePw.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; openChangePasswordModal(); };
+    const menuProfile = document.getElementById('menuProfile');
+    if(menuProfile) menuProfile.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; openProfileModal(); };
+    const menuBudget = document.getElementById('menuBudget');
+    if(menuBudget) menuBudget.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; openBudgetModal(); };
+    const menuChart = document.getElementById('menuChart');
+    if(menuChart) menuChart.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; openChartModal(); };
+    const menuExportPdf = document.getElementById('menuExportPdf');
+    if(menuExportPdf) menuExportPdf.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; exportPDF(); };
+    const menuBackup = document.getElementById('menuBackup');
+    if(menuBackup) menuBackup.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; downloadBackup(); };
+    const menuRestore = document.getElementById('menuRestore');
+    if(menuRestore) menuRestore.onclick = ()=>{ if(menuPanel) menuPanel.style.display='none'; triggerRestore(); };
+    const menuLogout = document.getElementById('menuLogout');
+    if(menuLogout) menuLogout.onclick = async ()=>{
+      if(menuPanel) menuPanel.style.display='none';
+      await supabase.auth.signOut();
+      state.session=null; state.expenses=[]; state.theme='paper'; applyTheme(); state.screen='login'; render();
+    };
+    document.querySelectorAll('.hk-stat').forEach(el=>{
+      el.onclick = ()=>{ const r=el.getAttribute('data-range'); state.filterRange = state.filterRange===r?'all':r; render(); };
+    });
+    document.querySelectorAll('#hkFilters .hk-chip').forEach(el=>{
+      el.onclick = ()=>{ state.filterCat = el.getAttribute('data-cat'); render(); };
+    });
+    document.querySelectorAll('.hk-row[data-id]').forEach(el=>{
+      el.onclick = ()=>{ const id=el.getAttribute('data-id'); const exp=state.expenses.find(e=>e.id===id); if(exp) openModal(exp); };
+    });
+    const hkSearchInput = document.getElementById('hkSearchInput');
+    if(hkSearchInput){
+      hkSearchInput.oninput = (e)=>{ state.searchQuery = e.target.value; render(); };
+      hkSearchInput.focus();
+      hkSearchInput.selectionStart = hkSearchInput.selectionEnd = hkSearchInput.value.length;
+    }
+
+    // admin shell
+    const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+    if(adminLogoutBtn) adminLogoutBtn.onclick = async ()=>{ await supabase.auth.signOut(); state.session=null; state.adminCache={}; state.adminExpanded=null; state.screen='login'; render(); };
+
+    wireEyeToggles(document);
+  }
+
+  init();
+})();
+</script>
