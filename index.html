@@ -501,7 +501,7 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       note: record.note,
       receipt: record.receipt,
     }).select().single();
-    if(error){ console.error(error); showToast(t('storage_save_fail')); return null; }
+    if(error){ console.error(error); showToast(error.message || t('storage_save_fail')); return null; }
     return { id:data.id, amount:Number(data.amount), datetime:data.datetime, category:data.category, payment:data.payment, note:data.note||'', receipt:data.receipt||null };
   }
   async function updateExpenseDb(id, record){
@@ -513,12 +513,12 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       note: record.note,
       receipt: record.receipt,
     }).eq('id', id);
-    if(error){ console.error(error); showToast(t('storage_save_fail')); return false; }
+    if(error){ console.error(error); showToast(error.message || t('storage_save_fail')); return false; }
     return true;
   }
   async function deleteExpenseDb(id){
     const { error } = await supabase.from('expenses').delete().eq('id', id);
-    if(error){ console.error(error); showToast(t('storage_save_fail')); return false; }
+    if(error){ console.error(error); showToast(error.message || t('storage_save_fail')); return false; }
     return true;
   }
   async function loadPrefsFromDb(userId){
@@ -530,7 +530,7 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   async function savePrefsToDb(){
     if(!state.session || !state.session.userId) return;
     const { error } = await supabase.from('prefs').upsert({ user_id: state.session.userId, theme: state.theme, budget: state.budget });
-    if(error){ console.error(error); showToast(t('storage_save_fail')); }
+    if(error){ console.error(error); showToast(error.message || t('storage_save_fail')); }
   }
   function applyTheme(){ document.body.classList.toggle('theme-dark', state.theme==='dark'); }
 
