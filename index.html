@@ -305,6 +305,7 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       pdf_col_date:'তারিখ', pdf_col_cat:'ক্যাটাগরি', pdf_col_pay:'মাধ্যম', pdf_col_note:'নোট', pdf_col_amt:'টাকা',
       pdf_no_data:'কোনো খরচ নেই',
       storage_save_fail:'ডেটা সংরক্ষণ করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করে আবার চেষ্টা করুন।',
+      session_expired:'আপনার লগইন মেয়াদ শেষ হয়ে গেছে। আবার লগইন করুন।',
       storage_too_large:'আপনার খরচের তালিকা (রশিদের ছবিসহ) অনেক বড় হয়ে গেছে। কিছু পুরনো রশিদের ছবি মুছে ফেলুন বা ব্যাকআপ ডাউনলোড করে রাখুন।',
       check_email_confirm:'অ্যাকাউন্ট তৈরি হয়েছে! লগইন করার আগে আপনার ইমেইল ইনবক্স চেক করে ভেরিফাই করুন।',
     },
@@ -367,6 +368,7 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       pdf_col_date:'Date', pdf_col_cat:'Category', pdf_col_pay:'Method', pdf_col_note:'Note', pdf_col_amt:'Amount',
       pdf_no_data:'No expenses',
       storage_save_fail:'Could not save your data. Please check your connection and try again.',
+      session_expired:'Your login session expired. Please log in again.',
       storage_too_large:'Your expense data (with receipt photos) has gotten quite large. Please remove some old receipt photos or download a backup.',
       check_email_confirm:'Account created! Please check your email inbox to verify your account before logging in.',
     },
@@ -486,14 +488,32 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       isAdmin: profile ? !!profile.is_admin : false,
     };
   }
+  // Before any write, ask Supabase directly "is this session actually still
+  // valid" instead of trusting the possibly-stale id kept in memory. If the
+  // session has gone stale, this also gives it a chance to auto-refresh.
+  async function verifiedUserId(){
+    try{
+      const { data, error } = await supabase.auth.getUser();
+      if(error || !data || !data.user){
+        showToast(t('session_expired'));
+        return null;
+      }
+      return data.user.id;
+    }catch(e){
+      showToast(t('session_expired'));
+      return null;
+    }
+  }
   async function loadExpensesForUser(userId){
     const { data, error } = await supabase.from('expenses').select('*').eq('user_id', userId).order('datetime', { ascending:false });
     if(error || !data) return [];
     return data.map(r=>({ id:r.id, amount:Number(r.amount), datetime:r.datetime, category:r.category, payment:r.payment, note:r.note||'', receipt:r.receipt||null }));
   }
   async function insertExpense(record){
+    const uid = await verifiedUserId();
+    if(!uid) return null;
     const { data, error } = await supabase.from('expenses').insert({
-      user_id: state.session.userId,
+      user_id: uid,
       amount: record.amount,
       datetime: new Date(record.datetime).toISOString(),
       category: record.category,
@@ -529,7 +549,9 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   }
   async function savePrefsToDb(){
     if(!state.session || !state.session.userId) return;
-    const { error } = await supabase.from('prefs').upsert({ user_id: state.session.userId, theme: state.theme, budget: state.budget });
+    const uid = await verifiedUserId();
+    if(!uid) return;
+    const { error } = await supabase.from('prefs').upsert({ user_id: uid, theme: state.theme, budget: state.budget });
     if(error){ console.error(error); showToast(error.message || t('storage_save_fail')); }
   }
   function applyTheme(){ document.body.classList.toggle('theme-dark', state.theme==='dark'); }
