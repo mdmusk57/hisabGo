@@ -382,13 +382,13 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   const SUPABASE_URL = 'https://mplksyduaxbwqmpoqcne.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_dOqvBS5eWZylSj08yZ8yaw_Zv5qupBA';
 
-  // Supabase Auth needs to persist its session somewhere. Browser localStorage
-  // is not available in this environment, so we hand it a tiny adapter that
-  // rides on top of the artifact's own window.storage (personal/per-device).
+  // Supabase Auth persists its session in the browser's own localStorage —
+  // this file runs as a standalone page (not inside Claude's artifact
+  // sandbox), so normal localStorage is available and is the reliable choice.
   const sbAuthStorage = {
-    getItem: async (key)=>{ try{ const r = await window.storage.get(key, false); return (r && r.value !== undefined) ? r.value : null; }catch(e){ return null; } },
-    setItem: async (key, value)=>{ try{ await window.storage.set(key, value, false); }catch(e){} },
-    removeItem: async (key)=>{ try{ await window.storage.delete(key, false); }catch(e){} },
+    getItem: (key)=>{ try{ return localStorage.getItem(key); }catch(e){ return null; } },
+    setItem: (key, value)=>{ try{ localStorage.setItem(key, value); }catch(e){} },
+    removeItem: (key)=>{ try{ localStorage.removeItem(key); }catch(e){} },
   };
   let supabase = null;
   async function ensureSupabase(){
@@ -442,24 +442,18 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
     language:'bn', // 'bn' | 'en'
   };
 
-  async function storageGet(key, shared){
+  async function storageGet(key){
     try{
-      const res = await window.storage.get(key, shared);
-      return res && res.value ? JSON.parse(res.value) : null;
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
     }catch(e){ return null; }
   }
-  async function storageSet(key, value, shared, attempt){
-    attempt = attempt || 1;
+  async function storageSet(key, value){
     try{
-      const json = JSON.stringify(value);
-      await window.storage.set(key, json, shared);
+      localStorage.setItem(key, JSON.stringify(value));
       return true;
     }catch(e){
       console.error('storage set failed', e);
-      if(attempt < 3){
-        await new Promise(r=>setTimeout(r, 400*attempt));
-        return storageSet(key, value, shared, attempt+1);
-      }
       showToast(t('storage_save_fail'));
       return false;
     }
@@ -614,7 +608,7 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
     state.remembered = { email, password };
   }
   async function clearRemembered(){
-    try{ await window.storage.delete(REMEMBER_KEY, false); }catch(e){}
+    try{ localStorage.removeItem(REMEMBER_KEY); }catch(e){}
     state.remembered = null;
   }
 
