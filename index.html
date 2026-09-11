@@ -1,5 +1,12 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>HisabGo — হিসাবগো</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
+
 
 :root{
   --ledger-green:#1F4B3F;
@@ -259,8 +266,20 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   .hk-btn-delete:hover{ background:#fdf2f2; }
   .ad-user-top:hover{ background:rgba(255,255,255,0.03); }
 }
-</style>
 
+/* ---------- MOBILE POLISH ---------- */
+@media (max-width:839px){
+  /* iOS Safari zooms the page in when a focused input's font is under 16px */
+  .hk-input, .hk-select, .hk-textarea, .hk-search-input, .ad-search{ font-size:16px; }
+}
+/* Respect notches / home-indicator areas on phones */
+.hk-header{ padding-top:calc(18px + env(safe-area-inset-top)); }
+.hk-body{ padding-bottom:calc(90px + env(safe-area-inset-bottom)); }
+.hk-modal{ padding-bottom:calc(24px + env(safe-area-inset-bottom)); }
+.hk-auth-wrap{ padding-top:calc(30px + env(safe-area-inset-top)); padding-bottom:calc(30px + env(safe-area-inset-bottom)); }
+</style>
+</head>
+<body>
 <div id="hkApp"></div>
 
 <script>
@@ -1573,3 +1592,5 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   init();
 })();
 </script>
+</body>
+</html>
