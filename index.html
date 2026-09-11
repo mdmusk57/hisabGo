@@ -217,6 +217,48 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
 .ad-row .cat{ color:var(--admin-text); }
 .ad-row .amt{ color:var(--admin-accent); font-weight:600; }
 .ad-foot{ text-align:center; font-size:11px; color:var(--admin-muted); padding:20px 0; }
+
+/* ---------- LARGER SCREENS: the notebook sits on a "desk" ---------- */
+@media (min-width:840px){
+  body{
+    background: radial-gradient(ellipse at top, #efe8d6 0%, #ddd0ab 55%, #cfc094 100%);
+  }
+  body.theme-dark{
+    background: radial-gradient(ellipse at top, #1b2530 0%, #0d1318 65%, #070a0d 100%);
+  }
+  .hk-root{
+    max-width:600px; margin:36px auto 60px auto; min-height:calc(100vh - 96px);
+    border-radius:22px; overflow:hidden;
+    box-shadow:0 34px 64px -24px rgba(40,30,10,0.38), 0 1px 0 rgba(255,255,255,0.5) inset;
+  }
+  body.theme-dark .hk-root{ box-shadow:0 34px 64px -24px rgba(0,0,0,0.6); }
+  .hk-auth-wrap{ background:transparent; }
+
+  /* Modal reads as a centered dialog on desktop, not a phone bottom-sheet */
+  .hk-overlay{ align-items:center; padding:24px; }
+  .hk-modal{ border-radius:20px; max-width:460px; animation:hkModalPop 0.16s ease; }
+  @keyframes hkModalPop{ from{ transform:scale(0.96); opacity:0; } to{ transform:scale(1); opacity:1; } }
+
+  .ad-root{ background: radial-gradient(ellipse at top, #22303f 0%, var(--admin-bg) 60%); }
+  .ad-wrap{ padding-top:8px; }
+}
+
+/* ---------- MOUSE / TRACKPAD: hover feedback ---------- */
+@media (hover:hover) and (pointer:fine){
+  .hk-add-btn:hover{ filter:brightness(1.04); }
+  .hk-chip:hover{ border-color:var(--ledger-green); color:var(--ledger-green); }
+  .hk-chip.active:hover{ color:#fff; }
+  .hk-row:hover{ border-color:var(--ledger-green); transform:translateY(-1px); box-shadow:0 6px 14px rgba(31,75,63,0.1); }
+  .hk-menu-item:hover{ background:var(--paper); }
+  .hk-menu-btn:hover{ background:rgba(255,255,255,0.22); }
+  .hk-cat-opt:hover{ border-color:var(--ledger-green); }
+  .hk-pay-opt:hover{ border-color:var(--gold); }
+  .hk-tab:not(.active):hover{ color:var(--ledger-green); }
+  .hk-link:hover{ opacity:0.78; }
+  .hk-btn-save:hover{ filter:brightness(1.06); }
+  .hk-btn-delete:hover{ background:#fdf2f2; }
+  .ad-user-top:hover{ background:rgba(255,255,255,0.03); }
+}
 </style>
 
 <div id="hkApp"></div>
