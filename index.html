@@ -598,14 +598,9 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       const { data:{ session } } = await supabase.auth.getSession();
       if(session && session.user){
         await hydrateSessionFromAuthUser(session.user);
-        if(state.session.isAdmin){
-          await loadAdminData();
-          state.screen = 'admin';
-        } else {
-          state.expenses = await loadExpensesForUser(state.session.userId);
-          await loadPrefsFromDb(state.session.userId);
-          state.screen = 'app';
-        }
+        state.expenses = await loadExpensesForUser(state.session.userId);
+        await loadPrefsFromDb(state.session.userId);
+        state.screen = 'app';
       } else {
         state.screen = 'login';
       }
@@ -795,9 +790,11 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   }
 
   async function loadAdminData(){
-    const { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending:false });
+    const { data: profiles, error: pErr } = await supabase.rpc('admin_get_profiles');
+    if(pErr) console.error(pErr);
     state.users = profiles || [];
-    const { data: allExpenses } = await supabase.from('expenses').select('*');
+    const { data: allExpenses, error: eErr } = await supabase.rpc('admin_get_expenses');
+    if(eErr) console.error(eErr);
     state.adminCache = {};
     (allExpenses || []).forEach(e=>{
       if(!state.adminCache[e.user_id]) state.adminCache[e.user_id] = { list:[], count:0, total:0 };
@@ -887,9 +884,8 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
         const uidv = el.getAttribute('data-deluser');
         const u = state.users.find(x=>x.id===uidv);
         if(!confirm(`"${u.name}" এর সব ডেটা মুছে ফেলতে চান? তার লগইন অ্যাকাউন্ট Supabase-এ থেকে যাবে, শুধু অ্যাপের ডেটা মুছে যাবে।`)) return;
-        await supabase.from('expenses').delete().eq('user_id', uidv);
-        await supabase.from('prefs').delete().eq('user_id', uidv);
-        await supabase.from('profiles').delete().eq('id', uidv);
+        const { error } = await supabase.rpc('admin_delete_user_data', { target_user_id: uidv });
+        if(error){ console.error(error); showToast(t('storage_save_fail')); return; }
         state.users = state.users.filter(x=>x.id!==uidv);
         delete state.adminCache[uidv];
         if(state.adminExpanded===uidv) state.adminExpanded=null;
@@ -1398,11 +1394,6 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       if(error || !data.user){ setBtnLoading(loginBtn, false); state.authError = t('err_login_fail'); render(); return; }
       if(rememberChk && rememberChk.checked){ await saveRemembered(email, pass); } else { await clearRemembered(); }
       await hydrateSessionFromAuthUser(data.user);
-      if(state.session.isAdmin){
-        await loadAdminData();
-        state.authError=''; state.screen='admin'; render();
-        return;
-      }
       state.expenses = await loadExpensesForUser(state.session.userId);
       await loadPrefsFromDb(state.session.userId);
       state.authError=''; state.screen='app'; render();
