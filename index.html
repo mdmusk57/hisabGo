@@ -494,13 +494,19 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
   async function verifiedUserId(){
     try{
       const { data, error } = await supabase.auth.getUser();
-      if(error || !data || !data.user){
+      if(error){
+        console.error('getUser error:', error);
+        showToast('Auth check failed: ' + (error.message || error.name || 'unknown'));
+        return null;
+      }
+      if(!data || !data.user){
         showToast(t('session_expired'));
         return null;
       }
       return data.user.id;
     }catch(e){
-      showToast(t('session_expired'));
+      console.error('getUser threw:', e);
+      showToast('Auth check error: ' + (e && e.message ? e.message : String(e)));
       return null;
     }
   }
