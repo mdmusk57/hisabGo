@@ -620,9 +620,14 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       const { data:{ session } } = await supabase.auth.getSession();
       if(session && session.user){
         await hydrateSessionFromAuthUser(session.user);
-        state.expenses = await loadExpensesForUser(state.session.userId);
-        await loadPrefsFromDb(state.session.userId);
-        state.screen = 'app';
+        if(state.session.isAdmin){
+          await loadAdminData();
+          state.screen = 'admin';
+        } else {
+          state.expenses = await loadExpensesForUser(state.session.userId);
+          await loadPrefsFromDb(state.session.userId);
+          state.screen = 'app';
+        }
       } else {
         state.screen = 'login';
       }
@@ -1416,6 +1421,11 @@ body,.hk-root{ font-family:'Hind Siliguri',sans-serif; color:var(--ink); margin:
       if(error || !data.user){ setBtnLoading(loginBtn, false); state.authError = t('err_login_fail'); render(); return; }
       if(rememberChk && rememberChk.checked){ await saveRemembered(email, pass); } else { await clearRemembered(); }
       await hydrateSessionFromAuthUser(data.user);
+      if(state.session.isAdmin){
+        await loadAdminData();
+        state.authError=''; state.screen='admin'; render();
+        return;
+      }
       state.expenses = await loadExpensesForUser(state.session.userId);
       await loadPrefsFromDb(state.session.userId);
       state.authError=''; state.screen='app'; render();
